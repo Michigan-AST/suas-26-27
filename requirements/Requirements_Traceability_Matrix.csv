@@ -1,0 +1,290 @@
+ID,Level,Subsystem,Title,Parents,Handbook Ref,Document
+L0-ELG-01,L0,Program,Team 75 percent or more full-time students,External,1.4.1,L0_Competition_Requirements.md
+L0-ELG-02,L0,Program,Exactly one aircraft design entered,External,"1.4, 5.1.2",L0_Competition_Requirements.md
+L0-ELG-03,L0,Program,Design locked at Proof of Flight Readiness Video; 5 percent size/weight change limit,External,5.3.4,L0_Competition_Requirements.md
+L0-ELG-04,L0,Program,Minimum 2 and maximum 4 operators; maximum 8 on flight line,External,"1.4.1, 3.3",L0_Competition_Requirements.md
+L0-ELG-05,L0,Program,Team lead designated and sole speaker during mission,External,5.1.6,L0_Competition_Requirements.md
+L0-ELG-06,L0,Program,Representative present at team orientation,External,5.1.7,L0_Competition_Requirements.md
+L0-DOC-01,L0,Program,Technical Design Report max 10 pages (150 pts),External,"2.3, 4.1.1",L0_Competition_Requirements.md
+L0-DOC-02,L0,Program,Team website (100 pts),External,"2.4, 4.1.1",L0_Competition_Requirements.md
+L0-DOC-03,L0,Program,Proof of Flight Readiness Video determines flight order and invitation,External,"2.1, 3.0.7",L0_Competition_Requirements.md
+L0-DOC-04,L0,Program,Proof of Pilot Competence Video,External,2.2,L0_Competition_Requirements.md
+L0-REG-01,L0,Regulatory,FAA registration via FAADroneZone and external marking,External,5.3.3,L0_Competition_Requirements.md
+L0-REG-02,L0,Regulatory,Remote ID broadcast of unique ID and position,External,5.3.3,L0_Competition_Requirements.md
+L0-REG-03,L0,Regulatory,Safety Pilot holds FAA TRUST certificate,External,5.3.3,L0_Competition_Requirements.md
+L0-REG-04,L0,Regulatory,All RF comms FCC compliant; judges use 462 MHz,External,5.3.12,L0_Competition_Requirements.md
+L0-REG-05,L0,Regulatory,No spectrum management provided; prevent invalid autopilot connections,External,5.3.12,L0_Competition_Requirements.md
+L0-VEH-01,L0,Vehicle,Battery electric only; no fuels or exotic batteries,External,"5.1.4, 5.3.6",L0_Competition_Requirements.md
+L0-VEH-02,L0,Vehicle,All-up weight 35 lb or less,External,"5.3.2, 3.4.1",L0_Competition_Requirements.md
+L0-VEH-03,L0,Vehicle,Maximum weight points at 15 lb or less (50 pts),External,"3.4.1, 3.4.4",L0_Competition_Requirements.md
+L0-VEH-04,L0,Vehicle,Heavier than air and free flying with no tethers,External,5.3.2,L0_Competition_Requirements.md
+L0-VEH-05,L0,Vehicle,Batteries brightly coloured and removable without deconstruction,External,5.3.6,L0_Competition_Requirements.md
+L0-VEH-06,L0,Vehicle,All fasteners safety wired Loctited or nylon locked,External,Appendix B,L0_Competition_Requirements.md
+L0-VEH-07,L0,Vehicle,No parts depart in flight; no FOD,External,5.3.9,L0_Competition_Requirements.md
+L0-VEH-08,L0,Vehicle,Personnel clear of prop arc when powered; software disarm insufficient,External,"5.3.10, Appendix B",L0_Competition_Requirements.md
+L0-VEH-09,L0,Vehicle,No battery swap or recharge on Mission Clock,External,"5.3.6, 3.1.3",L0_Competition_Requirements.md
+L0-VEH-10,L0,Vehicle,Transport sizing tiers Personal Item 50 / Carry-On 25 / Check-In 10 pts,External,3.4.2,L0_Competition_Requirements.md
+L0-VEH-11,L0,Vehicle,Unpack to flight ready in 3 minutes with max 4 personnel,External,3.4.2,L0_Competition_Requirements.md
+L0-VEH-12,L0,Vehicle,Toolless unpacking (25 pts),External,3.4.2,L0_Competition_Requirements.md
+L0-VEH-13,L0,Vehicle,Every individually packaged battery under 100 Wh (75 pts),External,3.4.3,L0_Competition_Requirements.md
+L0-SAF-01,L0,Safety,Autonomous RTH/RTL activatable by Safety Pilot and GCS Operator,External,"5.3.8, Appendix B",L0_Competition_Requirements.md
+L0-SAF-02,L0,Safety,Autonomous flight termination activatable by both operators,External,"5.3.8, Appendix B",L0_Competition_Requirements.md
+L0-SAF-03,L0,Safety,Automatic RTH/RTL after 15 s comms loss,External,Appendix B,L0_Competition_Requirements.md
+L0-SAF-04,L0,Safety,Automatic flight termination after 90 s comms loss,External,Appendix B,L0_Competition_Requirements.md
+L0-SAF-05,L0,Safety,Manual Safety Pilot takeoff and override at any time,External,5.3.1,L0_Competition_Requirements.md
+L0-SAF-06,L0,Safety,Safety-critical functions onsite with no internet or cloud dependency,External,"5.3.5, Appendix B",L0_Competition_Requirements.md
+L0-SAF-07,L0,Safety,Pass safety inspection before flight,External,"5.2.1, Appendix B",L0_Competition_Requirements.md
+L0-SAF-08,L0,Safety,Battery specs MSDS disposal procedures and handling discipline,External,5.2.2,L0_Competition_Requirements.md
+L0-SAF-09,L0,Safety,PPE checklists first aid and fire extinguisher on site,External,5.2,L0_Competition_Requirements.md
+L0-SAF-10,L0,Safety,Prepared to secure equipment against sudden weather,External,5.1.12,L0_Competition_Requirements.md
+L0-SAF-11,L0,Safety,Avoid other teams UAS; up to two aircraft in airspace,External,5.3.7,L0_Competition_Requirements.md
+L0-SAF-12,L0,Safety,Operate with autonomy while retaining manual takeoff capability,External,5.3.1,L0_Competition_Requirements.md
+L0-FLT-01,L0,Flight,Fly waypoints within 100 ft with threshold configured in autopilot,External,3.0.1,L0_Competition_Requirements.md
+L0-FLT-02,L0,Flight,GCS waypoint threshold configured below 50 ft,External,Appendix B,L0_Competition_Requirements.md
+L0-FLT-03,L0,Flight,150 ft turn radius and remain in Flight Boundary,External,3.0.1,L0_Competition_Requirements.md
+L0-FLT-04,L0,Flight,20 degree climb and descent angles,External,3.0.1,L0_Competition_Requirements.md
+L0-FLT-05,L0,Flight,Above 150 ft AGL when more than 500 ft from runway,External,3.0.1,L0_Competition_Requirements.md
+L0-FLT-06,L0,Flight,Remain in Flight Boundary polygon and 150-400 ft AGL band or mission terminated,External,3.0.4,L0_Competition_Requirements.md
+L0-FLT-07,L0,Flight,Takeoff and land on assigned runway; Runway 2 is 40x40 ft VTOL only,External,"3.0.1, 3.0.2",L0_Competition_Requirements.md
+L0-FLT-08,L0,Flight,Operate in any airfield winds and temperatures to 110 F,External,5.3.11,L0_Competition_Requirements.md
+L0-FLT-09,L0,Flight,September average wind 14 mph; no precipitation ops; fog with 3 mi visibility,External,5.3.11,L0_Competition_Requirements.md
+L0-FLT-10,L0,Flight,Terrain 633-748 ft MSL; 2 degrees west deviation; trees to 100 ft AGL,External,3.0.3,L0_Competition_Requirements.md
+L0-FLT-11,L0,Flight,Flight Boundary 11-vertex polygon; Search Boundary ~10 acres,External,"3.0.4, 3.0.5",L0_Competition_Requirements.md
+L0-MSN-01,L0,Mission,45 minute Mission Time including setup; no setup before clock,External,3.1.1,L0_Competition_Requirements.md
+L0-MSN-02,L0,Mission,Clock stops on runway cleared airspace relinquished deliverables submitted,External,3.1.1,L0_Competition_Requirements.md
+L0-MSN-03,L0,Mission,10 minute teardown from flight line tent,External,3.1.2,L0_Competition_Requirements.md
+L0-MSN-04,L0,Mission,All intended laps before Search Boundary entry; at least one lap first,External,3.0.9,L0_Competition_Requirements.md
+L0-MSN-05,L0,Mission,Waypoint sequences for both flight lines issued at Check-In,External,3.2.2,L0_Competition_Requirements.md
+L0-END-01,L0,Endurance,One successful takeoff and landing (20 pts),External,"3.2.1, 3.2.3",L0_Competition_Requirements.md
+L0-END-02,L0,Endurance,All takeoffs and landings fully autonomous by single command (30 pts),External,"3.2.1, 3.2.3",L0_Competition_Requirements.md
+L0-END-03,L0,Endurance,Endurance scores 200 x (laps/10)^2 up to 10 laps,External,3.2.3,L0_Competition_Requirements.md
+L0-END-04,L0,Endurance,Lap is up to 15 waypoints and about 2 miles; within 100 ft of each,External,3.2.2,L0_Competition_Requirements.md
+L0-END-05,L0,Endurance,Laps in order fully autonomous; no partial credit; count locks on Search entry,External,3.2.2,L0_Competition_Requirements.md
+L0-OPR-01,L0,Operators,Operators score 200 x min(1 (4-O)/2); 4 operators scores zero,External,3.3.1,L0_Competition_Requirements.md
+L0-OPR-02,L0,Operators,Safety Pilot and GCS Operator perform no other task in flight,External,3.3,L0_Competition_Requirements.md
+L0-OPR-03,L0,Operators,Non-operators observe only; assignments declared and fixed,External,3.3,L0_Competition_Requirements.md
+L0-MAP-01,L0,Mapping,Submit map via USB within Mission Time,External,3.5.1,L0_Competition_Requirements.md
+L0-MAP-02,L0,Mapping,Map is png or jpeg with team name in filename,External,3.5.1,L0_Competition_Requirements.md
+L0-MAP-03,L0,Mapping,Map scores 0-150 on coverage projection accuracy and stitching,External,3.5.2,L0_Competition_Requirements.md
+L0-MAP-04,L0,Mapping,Map exceeds area and resolution of a single photograph,External,3.5,L0_Competition_Requirements.md
+L0-MAP-05,L0,Mapping,No ground-based imaging sensors substituting for airborne payload,External,5.3.5,L0_Competition_Requirements.md
+L0-SDD-01,L0,Delivery,Carry all delivery objects simultaneously; no landing to reload,External,3.6,L0_Competition_Requirements.md
+L0-SDD-02,L0,Delivery,Objects are 155 g GP908 beacon and 255 g 8 oz water bottle,External,3.6,L0_Competition_Requirements.md
+L0-SDD-03,L0,Delivery,Each delivery payload 2 lb or less including all separating hardware,External,"3.6.1, Appendix B",L0_Competition_Requirements.md
+L0-SDD-04,L0,Delivery,Payload has no means of sustaining flight,External,"3.6.1, Appendix B",L0_Competition_Requirements.md
+L0-SDD-05,L0,Delivery,Freefall delivery not credited; retardant mechanism required,External,3.6.1,L0_Competition_Requirements.md
+L0-SDD-06,L0,Delivery,Payload lands undamaged and is safe for humans to be present and handle,External,3.6.1,L0_Competition_Requirements.md
+L0-SDD-07,L0,Delivery,Judge separates object from payload without tools or instructions,External,3.6.1,L0_Competition_Requirements.md
+L0-SDD-08,L0,Delivery,Remain above 150 ft AGL while conducting deliveries,External,3.6,L0_Competition_Requirements.md
+L0-SDD-09,L0,Delivery,At least one full waypoint lap before any delivery,External,"3.6, 3.6.3",L0_Competition_Requirements.md
+L0-SDD-10,L0,Delivery,Detect mannequin for bottle and tent for beacon; any pose and occlusion,External,3.6.2,L0_Competition_Requirements.md
+L0-SDD-11,L0,Delivery,Per delivery 20 survive + 50 within 50 ft + 30 correct target,External,3.6.3,L0_Competition_Requirements.md
+L0-SDD-12,L0,Delivery,Judges may occupy Search Boundary; 50 ft radius may be marked,External,3.6,L0_Competition_Requirements.md
+L0-GCS-01,L0,GCS,Judge-viewable map display of boundaries position and competition elements,External,3.0.6,L0_Competition_Requirements.md
+L0-GCS-02,L0,GCS,Display position ground speed in knots and altitude in feet AGL,External,"3.0.6, Appendix B",L0_Competition_Requirements.md
+L0-GCS-03,L0,GCS,Continuous uninterrupted judge access or no takeoff / forced landing,External,"3.0.6, 3.0.8",L0_Competition_Requirements.md
+L0-GCS-04,L0,GCS,No ground equipment taller than 15 ft,External,5.3.5,L0_Competition_Requirements.md
+L0-PEN-01,L0,Penalties,Excess time 0.5 percent of mission points per second,External,"3.8.1, 3.7",L0_Competition_Requirements.md
+L0-PEN-02,L0,Penalties,Parts falling off 10 percent per item,External,3.8.2,L0_Competition_Requirements.md
+L0-PEN-03,L0,Penalties,Crash or collision 50 percent,External,3.8.3,L0_Competition_Requirements.md
+L0-PEN-04,L0,Penalties,Unsafe operations 50 percent per infraction,External,3.8.4,L0_Competition_Requirements.md
+L0-PEN-05,L0,Penalties,Safety-critical boundary breach terminates mission,External,3.8.5,L0_Competition_Requirements.md
+L0-PEN-06,L0,Penalties,Manual takeover requires lap restart,External,3.8.6,L0_Competition_Requirements.md
+MAST-L1-01,L1,System,All-up weight target 15.0 lb and never above 35.0 lb,"L0-VEH-02, L0-VEH-03",,L1_System_Requirements.md
+MAST-L1-02,L1,System,Stow within Carry-On envelope 559 x 356 x 229 mm including GSE,L0-VEH-10,,L1_System_Requirements.md
+MAST-L1-03,L1,System,Assemble toolless in 180 s with 2 people,"L0-VEH-11, L0-VEH-12, L0-OPR-01",,L1_System_Requirements.md
+MAST-L1-04,L1,System,Cruise 25 m/s true airspeed at max weight and 110 F,"L0-END-03, L0-END-04, L0-MSN-01",,L1_System_Requirements.md
+MAST-L1-05,L1,System,32.19 km cruise plus mapping search and two deliveries with 20 percent reserve,"L0-END-03, L0-VEH-09, L0-MAP-01, L0-SDD-01",,L1_System_Requirements.md
+MAST-L1-06,L1,System,Sustain 45.7 m radius turn at 25 m/s with 1.3x stall margin,L0-FLT-03,,L1_System_Requirements.md
+MAST-L1-07,L1,System,20 degree climb and descent angle,L0-FLT-04,,L1_System_Requirements.md
+MAST-L1-08,L1,System,Operate 150-400 ft AGL referenced to varying terrain,"L0-FLT-05, L0-FLT-06, L0-FLT-10",,L1_System_Requirements.md
+MAST-L1-09,L1,System,VTOL from 12.2 m square pad with 3.0 m CEP touchdown,L0-FLT-07,,L1_System_Requirements.md
+MAST-L1-10,L1,System,Transition in 10 s within 100 m corridor and 15 m altitude excursion,"L0-FLT-06, L0-SAF-11",,L1_System_Requirements.md
+MAST-L1-11,L1,System,Hover hold 3.0 m in 6.3 m/s wind gusting 9.8 m/s; controllable to 8.5 m/s,"L0-FLT-08, L0-FLT-09",,L1_System_Requirements.md
+MAST-L1-12,L1,System,Full performance to 43.3 C with no thermal derate,L0-FLT-08,,L1_System_Requirements.md
+MAST-L1-13,L1,System,Full mission autonomy beyond single takeoff and landing commands,"L0-END-02, L0-END-05, L0-OPR-02, L0-PEN-06",,L1_System_Requirements.md
+MAST-L1-14,L1,System,Operable end to end by exactly 2 operators,"L0-OPR-01, L0-OPR-02",,L1_System_Requirements.md
+MAST-L1-15,L1,System,Waypoints within 30.5 m with acceptance radius below 15.2 m and 5 m nav error,"L0-FLT-01, L0-FLT-02",,L1_System_Requirements.md
+MAST-L1-16,L1,System,RTL and termination from both operators plus 15 s and 90 s auto triggers,"L0-SAF-01, L0-SAF-02, L0-SAF-03, L0-SAF-04, L0-SAF-06",,L1_System_Requirements.md
+MAST-L1-17,L1,System,Place each payload within 15.2 m of target from above 45.7 m AGL at 10 m CEP,"L0-SDD-08, L0-SDD-11",,L1_System_Requirements.md
+MAST-L1-18,L1,System,Continuous link with no outage above 5.0 s under uncoordinated interference,"L0-SAF-03, L0-REG-04, L0-REG-05, L0-GCS-04",,L1_System_Requirements.md
+MAST-L1-19,L1,System,Detect classify and geolocate mannequin and tent to 5.0 m,"L0-SDD-10, L0-SDD-11",,L1_System_Requirements.md
+MAST-L1-20,L1,System,Autonomous orthomosaic at 2.0 cm/px exported to USB in Mission Time,"L0-MAP-01, L0-MAP-02, L0-MAP-03, L0-MAP-04, MAST-L1-14",,L1_System_Requirements.md
+MAST-L1-21,L1,System,330 Wh installed across sub-100 Wh accessible brightly coloured packs,"L0-VEH-05, L0-VEH-13, MAST-L1-05",,L1_System_Requirements.md
+MAST-L1-22,L1,System,1.72 g limit load with 1.5 factor of safety plus hover and landing cases,"L0-VEH-07, L0-PEN-02, L0-PEN-03",,L1_System_Requirements.md
+MAST-L1-23,L1,System,No part departure; all fasteners positively retained,"L0-VEH-06, L0-VEH-07, L0-PEN-02",,L1_System_Requirements.md
+MAST-L1-24,L1,System,Physical propeller restraint or motor power disconnect,L0-VEH-08,,L1_System_Requirements.md
+MAST-L1-25,L1,System,Maintain separation from second UAS with GCS situational awareness,"L0-SAF-11, L0-PEN-03",,L1_System_Requirements.md
+MAST-L1-26,L1,System,FAA registration marking and Remote ID broadcast,"L0-REG-01, L0-REG-02",,L1_System_Requirements.md
+MAST-L1-27,L1,System,Configuration frozen at Proof of Flight Readiness within 5 percent,L0-ELG-03,,L1_System_Requirements.md
+MAST-L1-28,L1,System,All safety-critical functions onsite with no cloud dependency,L0-SAF-06,,L1_System_Requirements.md
+MAST-L2-AIR-01,L2,Airframe,Structural mass allocation 1.60 kg tracked on measured mass properties,"MAST-L1-01, MAST-L1-27",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-02,L2,Airframe,Wing area 0.45 m2 with CL_max at least 1.2,"MAST-L1-04, MAST-L1-06",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-03,L2,Airframe,Aspect ratio at least 6.5,"MAST-L1-04, MAST-L1-05",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-04,L2,Airframe,1.72 g limit load with 1.5 FoS plus hover gust case sizing booms,"MAST-L1-22, MAST-L1-06, MAST-L1-11",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-05,L2,Airframe,Withstand 2.0 m/s vertical landing impact at max weight,"MAST-L1-09, L0-END-01",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-06,L2,Airframe,Max 4 wing segments under 550 mm stowing in one 559 x 356 x 229 mm envelope,"MAST-L1-02, L0-VEH-10",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-07,L2,Airframe,Joints toolless under 50 N positively locked with engagement indication,"MAST-L1-03, MAST-L1-23, L0-VEH-12",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-08,L2,Airframe,Max 8 field joints each rated 500 assembly cycles,MAST-L1-03,,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-09,L2,Airframe,Threaded fasteners retained; field joints use captive non-threaded locks,"L0-VEH-06, MAST-L1-23",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-10,L2,Airframe,External battery bays retaining 2.58 g all axes thermally isolated,"L0-VEH-05, MAST-L1-21, MAST-L1-22",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-11,L2,Airframe,Stable hover-attitude ground rest with prop arcs clear and interlock hard points,"MAST-L1-09, MAST-L1-24",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-12,L2,Airframe,Ground-resting structure integral or stowing within envelope,"MAST-L1-02, MAST-L1-03",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-13,L2,Airframe,Control authority for 54.3 degree bank across full CG range; sealed hinges,"MAST-L1-06, MAST-L2-PLD-16",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-14,L2,Airframe,CG within limits in both attitudes across four payload load states,"MAST-L1-10, MAST-L2-PLD-16",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-15,L2,Airframe,External FAA registration marking,"L0-REG-01, MAST-L1-26",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-16,L2,Airframe,Retain structural properties after 43.3 C solar soak,MAST-L1-12,,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-17,L2,Airframe,Unobstructed camera aperture in cruise attitude,"MAST-L2-PER-02, MAST-L2-PER-07",,SUB-AIR_Airframe_Structures.md
+MAST-L2-AIR-18,L2,Airframe,Keyed blind-mate connectors engaging with joint motion; no sharp edges,"MAST-L1-03, MAST-L2-AIR-07",,SUB-AIR_Airframe_Structures.md
+MAST-L2-PRP-01,L2,Propulsion,133 N hover thrust for thrust-to-weight of 2.0,"MAST-L1-09, MAST-L1-11",,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-02,L2,Propulsion,311 W cruise power sustained 1900 s,"MAST-L1-04, MAST-L1-05",,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-03,L2,Propulsion,1270 W climb power for 20 degree angle at 25 m/s,MAST-L1-07,,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-04,L2,Propulsion,25 N-m differential-thrust control moment in hover,"MAST-L1-11, MAST-L1-09",,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-05,L2,Propulsion,90 percent thrust step response within 100 ms with active braking,"MAST-L1-11, MAST-L1-10",,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-06,L2,Propulsion,Rotor diameter under 355 mm with disk area at least 0.25 m2,"MAST-L1-02, MAST-L1-05",,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-07,L2,Propulsion,Transition in 10 s with 15 m altitude excursion,MAST-L1-10,,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-08,L2,Propulsion,Deterministic transition schedule on dedicated airspeed not GNSS,"MAST-L1-13, MAST-L1-10",,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-09,L2,Propulsion,Transition abort to previous stable mode on logged parameter thresholds,"MAST-L1-10, L0-PEN-03",,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-10,L2,Propulsion,Continuous cruise and 180 s hover thermal capability at 43.3 C with logging,MAST-L1-12,,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-11,L2,Propulsion,Single rotor loss yields controlled descent not departure,"L0-SAF-02, L0-PEN-03",,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-12,L2,Propulsion,Positive propeller retention inspected each flight,"L0-VEH-07, MAST-L1-23",,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-13,L2,Propulsion,Accept physical prop restraint or motor power disconnect,"MAST-L1-24, L0-VEH-08",,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-14,L2,Propulsion,Motors integral to boom segments; rotor positions keyed against reversal,"MAST-L1-03, MAST-L2-AIR-08",,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-15,L2,Propulsion,Propulsion outputs isolated from payload release outputs,MAST-L2-PLD-11,,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PRP-16,L2,Propulsion,First bending mode above 2.5x blade passage frequency,"MAST-L2-PRP-10, MAST-L2-PER-02",,SUB-PRP_Propulsion_Transition.md
+MAST-L2-PWR-01,L2,Power,330 Wh installed 293 Wh usable at 180 Wh/kg for 1.83 kg pack mass,"MAST-L1-05, MAST-L1-21, MAST-L1-01",,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-02,L2,Power,Every packaged battery below 100 Wh of commercial lithium chemistry,"L0-VEH-13, MAST-L1-21, L0-VEH-01",,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-03,L2,Power,Per-pack ideal-diode or FET isolation tolerating mismatched charge,"MAST-L1-21, L0-MSN-01",,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-04,L2,Power,59 A continuous at end-of-discharge with 1.5x pack margin and 30 C rise limit,"MAST-L2-PRP-01, MAST-L1-12",,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-05,L2,Power,Brightly coloured packs,L0-VEH-05,,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-06,L2,Power,Pack removal by hand in 15 s on 500-cycle polarity-protected connectors,"L0-VEH-05, MAST-L1-21, MAST-L1-03",,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-07,L2,Power,Avionics bus isolated from propulsion transients at 90 percent efficiency,"MAST-L1-12, MAST-L2-PER-20",,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-08,L2,Power,Redundant avionics regulation for flight controller,"L0-SAF-01, MAST-L1-16",,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-09,L2,Power,Pack temperature within limits at 43.3 C monitored and logged at 1 Hz,"MAST-L1-12, L0-SAF-08",,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-10,L2,Power,Report voltage current and consumed capacity at 2 Hz to 1 percent,"MAST-L1-05, MAST-L2-GCS-04",,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-11,L2,Power,Manual propulsion disconnect verifiable from outside prop arc,"MAST-L1-24, L0-VEH-08",,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-12,L2,Power,Hard copy battery documentation and LiPo bags for every pack,L0-SAF-08,,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-13,L2,Power,No battery service on Mission Clock,L0-VEH-09,,SUB-PWR_Power_Electrical.md
+MAST-L2-PWR-14,L2,Power,Wiring and connectors secured against departure in flight,"L0-VEH-07, MAST-L1-23",,SUB-PWR_Power_Electrical.md
+MAST-L2-GNC-01,L2,GNC,Position to 1.5 m on multi-constellation GNSS with RTK growth option,"MAST-L1-15, MAST-L1-17, MAST-L2-PER-15",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-02,L2,GNC,Attitude to 1.0 degree on redundant IMUs with failover,"MAST-L2-PER-15, MAST-L1-11",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-03,L2,GNC,Cross-track error under 5.0 m with acceptance radius below 15.2 m,"MAST-L1-15, L0-FLT-01, L0-FLT-02",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-04,L2,GNC,AGL computed against terrain model not single field datum,"MAST-L1-08, L0-FLT-10",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-05,L2,GNC,Predictive hard geofence with boundaries loadable as parameters,"MAST-L1-08, L0-FLT-06, L0-PEN-05, L0-FLT-11",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-06,L2,GNC,Hover hold 3.0 m horizontal and 1.5 m vertical in gusts,"MAST-L1-11, MAST-L1-09, MAST-L2-PLD-07",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-07,L2,GNC,Wind estimate to 1.5 m/s on dedicated airspeed outside rotor wash,"MAST-L2-PLD-08, MAST-L1-17",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-08,L2,GNC,Single-command autonomous VTOL takeoff and landing to 3.0 m,"L0-END-02, MAST-L1-09, MAST-L1-13",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-09,L2,GNC,Autonomous transitions on natively tailsitter-capable autopilot firmware,"MAST-L1-10, MAST-L1-13",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-10,L2,GNC,RTL and termination independently commandable on independent links,"L0-SAF-01, L0-SAF-02, MAST-L1-16",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-11,L2,GNC,Automatic RTL at 15 s and termination at 90 s comms loss,"L0-SAF-03, L0-SAF-04, MAST-L1-16",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-12,L2,GNC,Termination configuration appropriate to flight mode; confirm with organisers,L0-SAF-02,,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-13,L2,GNC,Manual override available any mode within 200 ms,"L0-SAF-05, L0-SAF-12, L0-PEN-04",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-14,L2,GNC,Failsafe logic executes onboard with no external dependency,"L0-SAF-06, MAST-L1-28",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-15,L2,GNC,Remote ID via self-contained module with own position source,"L0-REG-02, MAST-L1-26",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-16,L2,GNC,Log state and mode transitions at 10 Hz retained for 4 missions,"MAST-L1-27, MAST-L2-PRP-10",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-17,L2,GNC,Sensors unaffected to 43.3 C; static source attitude-insensitive,"MAST-L1-12, MAST-L2-GNC-04",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-18,L2,GNC,Magnetometer 150 mm from high current and calibrated as built,"MAST-L2-GNC-02, MAST-L2-GNC-06",,SUB-GNC_Avionics_GNC.md
+MAST-L2-GNC-19,L2,GNC,Expose position speed AGL at 4 Hz; load either flight line in 120 s,"MAST-L2-GCS-02, L0-GCS-02, L0-MSN-05",,SUB-GNC_Avionics_GNC.md
+MAST-L2-COM-01,L2,Comms,Bidirectional link everywhere in boundary with no outage above 5.0 s,"MAST-L1-18, L0-SAF-03",,SUB-COM_Communications.md
+MAST-L2-COM-02,L2,Comms,15 dB margin at 1.6 km with 100 mW radio and 6 dBi ground antenna,MAST-L1-18,,SUB-COM_Communications.md
+MAST-L2-COM-03,L2,Comms,Frequency hopping or dynamic channel selection with selectable maps,"L0-REG-05, MAST-L1-18",,SUB-COM_Communications.md
+MAST-L2-COM-04,L2,Comms,Unique non-default network ID and encryption preventing cross-team association,"L0-REG-05, MAST-L1-18",,SUB-COM_Communications.md
+MAST-L2-COM-05,L2,Comms,Manual link independent of telemetry in hardware and band,"MAST-L2-GNC-10, MAST-L1-16",,SUB-COM_Communications.md
+MAST-L2-COM-06,L2,Comms,No transmission in 462 MHz judge band,L0-REG-04,,SUB-COM_Communications.md
+MAST-L2-COM-07,L2,Comms,FCC compliant with maintained RF band plan at safety inspection,"L0-REG-04, L0-SAF-07",,SUB-COM_Communications.md
+MAST-L2-COM-08,L2,Comms,Ground antennas and supports under 15 ft,"L0-GCS-04, MAST-L1-18",,SUB-COM_Communications.md
+MAST-L2-COM-09,L2,Comms,Carry position speed altitude battery wind mode and target data,"L0-GCS-02, MAST-L2-GCS-02",,SUB-COM_Communications.md
+MAST-L2-COM-10,L2,Comms,Continuous link quality display and 1 Hz onboard logging,"MAST-L1-18, MAST-L1-14",,SUB-COM_Communications.md
+MAST-L2-COM-11,L2,Comms,No safety-critical function depends on link internet or cloud,"L0-SAF-06, MAST-L1-28, MAST-L2-GNC-14",,SUB-COM_Communications.md
+MAST-L2-COM-12,L2,Comms,Use wired connections on the ground where possible,L0-REG-05,,SUB-COM_Communications.md
+MAST-L2-COM-13,L2,Comms,No thermal shutdown or power reduction to 43.3 C,MAST-L1-12,,SUB-COM_Communications.md
+MAST-L2-COM-14,L2,Comms,Antennas 150 mm from carbon and GNSS with no null deeper than 10 dB,"MAST-L2-COM-02, MAST-L2-GNC-01",,SUB-COM_Communications.md
+MAST-L2-COM-15,L2,Comms,Verified alongside identical system within 50 m; video on separate band,"MAST-L2-COM-03, MAST-L2-COM-04, MAST-L2-COM-05",,SUB-COM_Communications.md
+MAST-L2-PLD-01,L2,Delivery,Carry and independently release two payloads,"L0-SDD-01, MAST-L1-17",,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-02,L2,Delivery,Each complete payload under 907 g,L0-SDD-03,,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-03,L2,Delivery,Combined payload mass allocation 1400 g,"MAST-L1-01, L0-SDD-03",,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-04,L2,Delivery,Retardant giving 8-12 m/s impact with terminal velocity measured by test,"L0-SDD-05, L0-SDD-06, MAST-L1-17",,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-05,L2,Delivery,Retardant deploys in 0.5 s and reaches terminal velocity in 1.0 s,MAST-L1-17,,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-06,L2,Delivery,No means of sustaining flight in payload,L0-SDD-04,,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-07,L2,Delivery,Release from hover with ground speed under 2.0 m/s,"MAST-L1-17, MAST-L1-11",,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-08,L2,Delivery,Wind-compensated release with inhibit outside 10.0 m prediction,"MAST-L1-17, MAST-L1-28",,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-09,L2,Delivery,Release altitude between 45.7 m and 53.0 m AGL,"L0-SDD-08, L0-FLT-06",,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-10,L2,Delivery,Retention through 1.72 g hover loads transition and landing,"L0-VEH-07, L0-PEN-02, MAST-L1-22",,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-11,L2,Delivery,Fail-safe retained on power loss; isolated outputs; mechanical interlock,"L0-SAF-06, MAST-L1-16, MAST-L1-24",,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-12,L2,Delivery,Judge separates object by hand in 10 s under 30 N without instructions,L0-SDD-07,,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-13,L2,Delivery,Bottle carrier fits 50-64 mm diameter and 127-152 mm height,L0-SDD-02,,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-14,L2,Delivery,Beacon carrier fits GP908 without obstructing strobe,L0-SDD-02,,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-15,L2,Delivery,Load each payload in 45 s by one operator with aircraft in cradle,"MAST-L1-03, L0-MSN-01",,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-16,L2,Delivery,CG shift on asymmetric release preserves controllability,"MAST-L1-10, MAST-L1-11",,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-17,L2,Delivery,Release of one payload does not disturb the other,"L0-SDD-11, MAST-L1-17",,SUB-PLD_Payload_Delivery.md
+MAST-L2-PLD-18,L2,Delivery,Publish predicted impact at 5 Hz; no sharp edges on handled surfaces,"MAST-L2-PLD-08, L0-SDD-06",,SUB-PLD_Payload_Delivery.md
+MAST-L2-PER-01,L2,Perception,GSD 2.0 cm/px or finer at 45.7 m with distortion corrected,"MAST-L1-20, MAST-L1-19",,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-02,L2,Perception,Fixed nadir mount with 50 Hz vibration isolation and no gimbal,"MAST-L1-20, MAST-L1-01",,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-03,L2,Perception,Sustained 2.0 Hz full resolution capture without frame drops,MAST-L1-20,,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-04,L2,Perception,Shutter at or below 1/1000 s throughout survey,MAST-L1-20,,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-05,L2,Perception,Exposure consistent within 1/3 stop between adjacent frames,MAST-L1-20,,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-06,L2,Perception,Survey ground speed at or below 18 m/s,"MAST-L1-20, MAST-L2-PER-03",,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-07,L2,Perception,70 percent overlap 30 percent sidelap 15 m buffer unobstructed aperture,MAST-L1-20,,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-08,L2,Perception,Frames hardware-timestamped with position and attitude within 20 ms,"MAST-L1-19, MAST-L1-20",,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-09,L2,Perception,Orthomosaic generated onboard or onsite with no human intervention,"MAST-L1-20, MAST-L1-14, MAST-L1-28",,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-10,L2,Perception,Map complete within 60 s of touchdown,"MAST-L1-20, L0-MSN-02, L0-PEN-01",,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-11,L2,Perception,png or jpeg with team name to judge USB verified by checksum in 30 s,"L0-MAP-01, L0-MAP-02",,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-12,L2,Perception,Detect and classify mannequin and tent at 95 percent confidence,"MAST-L1-19, L0-SDD-10",,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-13,L2,Perception,Robust to any pose and 50 percent occlusion with matched training data,L0-SDD-10,,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-14,L2,Perception,Reject debris false positives via 3-frame association,"L0-SDD-10, MAST-L1-19",,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-15,L2,Perception,Geolocate targets to 5.0 m and publish class and confidence at 1 Hz,"MAST-L1-19, MAST-L1-17",,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-16,L2,Perception,Detection within 30 s of search pass with weights resident locally,"MAST-L1-14, MAST-L1-28, L0-MSN-01",,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-17,L2,Perception,Imagery retained onboard so map survives total downlink loss,"MAST-L1-18, MAST-L1-20",,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-18,L2,Perception,Full workload at 43.3 C with no throttling and junction temp logged,MAST-L1-12,,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-19,L2,Perception,No ground-based sensor substituting for airborne payload,L0-MAP-05,,SUB-PER_Imaging_Perception.md
+MAST-L2-PER-20,L2,Perception,Camera and compute on avionics bus protected from transients,MAST-L1-12,,SUB-PER_Imaging_Perception.md
+MAST-L2-ASW-01,L2,Software,State machine sequences full mission on one start and one land command,"MAST-L1-13, L0-END-02",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-02,L2,Software,Enforce mandated task order for laps and Search Boundary entry,"L0-MSN-04, L0-END-05, L0-SDD-09",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-03,L2,Software,Treat Search Boundary as 25 m exclusion zone during lap phase,"L0-END-05, MAST-L1-15",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-04,L2,Software,Track and report lap count with energy-based abort,"L0-END-03, MAST-L2-PWR-10",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-05,L2,Software,Plan and fly boustrophedon survey meeting overlap and buffer requirements,"MAST-L1-20, MAST-L2-PER-07",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-06,L2,Software,Incremental stitching under 60 s at touchdown with bounded memory,"MAST-L2-PER-10, L0-PEN-01, MAST-L1-20",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-07,L2,Software,In-flight detection with frame association declaring one of each target,"MAST-L1-19, MAST-L2-PER-12, MAST-L2-PER-14",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-08,L2,Software,Hover approach to compensated release point over acknowledged interface,"MAST-L1-17, MAST-L2-PLD-07, MAST-L2-PLD-08",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-09,L2,Software,Inhibit release on bad prediction stale wind or low altitude,"MAST-L2-PLD-08, L0-SDD-08, MAST-L1-17",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-10,L2,Software,Assign bottle to mannequin and beacon to tent only,"L0-SDD-10, L0-SDD-11",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-11,L2,Software,Safety-critical autonomy executes onboard or onsite,"L0-SAF-06, MAST-L1-28",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-12,L2,Software,Fault-isolated watchdogged pipelines degrading gracefully,"MAST-L1-20, MAST-L1-19, L0-PEN-03",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-13,L2,Software,Per-phase autonomous abort avoiding manual takeover,"L0-PEN-06, MAST-L1-14",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-14,L2,Software,Tunable behaviour as exportable logged parameters without rebuild,MAST-L1-27,,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-15,L2,Software,Version controlled builds with flown build and parameters archived,"MAST-L1-27, L0-ELG-03",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-16,L2,Software,Import both flight line sequences with selection in 30 s,"L0-MSN-05, MAST-L2-GNC-19",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-17,L2,Software,Curtail lap phase if projected reserve falls below 20 percent,"MAST-L1-05, MAST-L2-PWR-10",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-18,L2,Software,Defined off-nominal transitions with decision-time logging,"MAST-L2-GNC-05, MAST-L2-GNC-11, MAST-L2-ASW-09",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-ASW-19,L2,Software,Single unambiguous mission phase indication to GCS,"MAST-L1-14, MAST-L2-GCS-04",,SUB-ASW_Autonomy_Flight_Software.md
+MAST-L2-GCS-01,L2,GCS,Display at least 13 in continuously viewable by judge and operator,"L0-GCS-01, L0-GCS-03",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-02,L2,GCS,Offline basemap showing boundaries waypoints radii position and track,"L0-GCS-01, L0-FLT-02, MAST-L1-28",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-03,L2,GCS,Ground speed in knots altitude in feet AGL threshold below 50 ft,"L0-GCS-02, L0-FLT-02",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-04,L2,GCS,Show phase laps energy link wind targets and Mission Time countdown,"MAST-L2-ASW-04, MAST-L2-PWR-10, MAST-L2-COM-10, MAST-L2-GNC-07, L0-PEN-01",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-05,L2,GCS,Sunlight readable at 1000 cd/m2 with hood and no compute throttling,"MAST-L1-12, L0-GCS-03",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-06,L2,GCS,Distinct guarded menu-free RTL and termination controls,"L0-SAF-01, L0-SAF-02, MAST-L2-GNC-10",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-07,L2,GCS,Failsafe commands function fully offline,"L0-SAF-06, MAST-L1-28",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-08,L2,GCS,90 minutes on 200 Wh self-contained power separate from aircraft packs,"L0-MSN-01, L0-MSN-03",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-09,L2,GCS,Inhibit all display sleep blank and dim behaviour,L0-GCS-03,,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-10,L2,GCS,Single-action verified USB export supporting FAT32 and exFAT,"MAST-L1-20, MAST-L2-PER-11",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-11,L2,GCS,All equipment under 15 ft and cased for 10 minute removal,"L0-GCS-04, L0-MSN-03",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-12,L2,GCS,Setup within allocation with no pre-clock power; wired radio at antenna,"L0-MSN-01, MAST-L1-03, MAST-L2-COM-12",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-13,L2,GCS,Log all telemetry received and commands issued,"MAST-L2-GNC-16, MAST-L2-COM-10",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-GCS-14,L2,GCS,Present preflight checklist covering console-verifiable inspection items,"L0-SAF-07, L0-SAF-09",,SUB-GCS_Ground_Control_Station.md
+MAST-L2-OPS-01,L2,Operations,Single container with located fixtures in assembly consumption order,"MAST-L1-02, L0-VEH-10",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-02,L2,Operations,Assembly requires no tools of any kind,"L0-VEH-12, MAST-L1-03",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-03,L2,Operations,Assembly by 2 people in 180 s ending with systems operating,"L0-VEH-11, MAST-L1-03, MAST-L1-14",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-04,L2,Operations,Full setup to armed by 2 operators in 420 s from clock start,"L0-MSN-01, MAST-L1-03, MAST-L2-GCS-12",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-05,L2,Operations,Rehearsed setup and teardown with standard deviation under 15 s,"MAST-L2-OPS-04, L0-PEN-01",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-06,L2,Operations,Cradle with 1.5 tipping margin clear prop arcs and vertical departure,"MAST-L2-AIR-11, MAST-L1-24, L0-VEH-08, MAST-L1-09",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-07,L2,Operations,Power disconnect engaged by default and verifiable outside prop arcs,"L0-VEH-08, MAST-L1-24, MAST-L2-PWR-11",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-08,L2,Operations,Weather-resistant hands-free checklists for all phases in hard copy,"L0-SAF-09, MAST-L2-GCS-14",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-09,L2,Operations,PPE first aid kit and fire extinguisher on site,L0-SAF-09,,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-10,L2,Operations,LiPo bags bucket and sand plus daily battery inspection log,L0-SAF-08,,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-11,L2,Operations,Hard copy registration Remote ID TRUST and battery documentation,"L0-REG-01, L0-REG-02, L0-REG-03, L0-SAF-08",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-12,L2,Operations,Exactly 2 declared operators with no assistance in flight,"L0-OPR-01, L0-OPR-02, L0-OPR-03, MAST-L1-14",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-13,L2,Operations,Safety Pilot TRUST certified and proficient in both flight modes,"L0-REG-03, L0-DOC-04, MAST-L2-GNC-13",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-14,L2,Operations,Secure equipment in 5 minutes against documented go/no-go criteria,"L0-SAF-10, MAST-L1-11, MAST-L2-ASW-17",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-15,L2,Operations,Clear flight line tent within 10 minutes using full team,"L0-MSN-03, L0-OPR-03",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-16,L2,Operations,Configuration record with 5 percent change gate and named mass owner,"L0-ELG-03, MAST-L1-27, MAST-L1-01",,SUB-OPS_Ground_Support_Operations.md
+MAST-L2-OPS-17,L2,Operations,Spares for every flight-critical replaceable component,"L0-ELG-03, L0-DOC-03",,SUB-OPS_Ground_Support_Operations.md
