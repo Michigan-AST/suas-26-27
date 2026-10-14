@@ -1,0 +1,10 @@
+test/
+shell.nix
+.venv
+**/__pycache__
+*.lock
+runs/
+*.pt
+*.jpg
+main.py
+*.mp4
