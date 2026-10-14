@@ -1,11 +1,10 @@
 FROM ubuntu:24.04
 
+RUN apt update
 
-apt update
-
-apt install -y \
+RUN apt install -y \
     bash \
     curl \
     git
 
-git clone https://github.com/PX4/PX4-Autopilot.git
+RUN git clone https://github.com/PX4/PX4-Autopilot.git
