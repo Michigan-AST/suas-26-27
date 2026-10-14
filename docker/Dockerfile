@@ -1,9 +1,9 @@
 FROM ubuntu:24.04
 
 
-sudo apt-get update
+apt update
 
-sudo apt-get install -y \
+apt install -y \
     bash \
     curl \
     git
