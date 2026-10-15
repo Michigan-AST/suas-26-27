@@ -4,7 +4,7 @@ Code and documentation for the M-AST 2026-27 drone for the S.U.A.S competition
 
 ## PX4 and Gazebo with Docker
 
-On macOS, start Docker Desktop and enable **Settings > Resources > Network > Enable host networking**. Install QGroundControl on the Mac; it runs outside the container.
+On macOS, start Docker Desktop and enable **Settings > Resources > Network > Enable host networking**. Apply this setting and wait for Docker Desktop to finish restarting before starting a build; restarting interrupts active builds. Install QGroundControl on the Mac; it runs outside the container.
 
 From the repository root:
 
