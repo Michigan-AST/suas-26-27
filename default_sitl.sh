@@ -1,1 +1,0 @@
-docker run --rm -it --network host px4io/px4-sitl:latest
