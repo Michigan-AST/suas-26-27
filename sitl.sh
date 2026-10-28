@@ -43,3 +43,5 @@ docker run -it --rm \
     --workdir="${PX4_SRC}" \
     --name=suas-px4-sitl \
     "$IMAGE_TAG" "$@"
+
+# Stop with docker stop suas-px4-sitl
