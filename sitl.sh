@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# If you use docker desktop, go to Docker Desktop → Settings → Resources → Network → Enable host networkin
 # RUN THIS FROM REPO ROOT (suas-26-27)
 
 ## helpful for debugging
