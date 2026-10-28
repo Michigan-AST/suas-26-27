@@ -1,0 +1,2 @@
+# Pin the gRPC-based API; MAVSDK 4 uses a different Python interface.
+mavsdk==3.10.2
