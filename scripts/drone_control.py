@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Student starter code: take off, fly a square loop, and loiter in PX4 SITL."""
 
+# .venv/bin/python scripts/drone_control.py
+
+
 import asyncio
 import json
 import math
