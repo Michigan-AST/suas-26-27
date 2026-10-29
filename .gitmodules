@@ -1,3 +1,4 @@
 [submodule "src/PX4-Autopilot"]
 	path = src/PX4-Autopilot
 	url = https://github.com/PX4/PX4-Autopilot.git
+	branch = v1.17.0

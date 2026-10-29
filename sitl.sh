@@ -11,11 +11,15 @@
 # -o pipefail: if any command in a pipeline fails, cascade the error and the entire script fails
 set -euxo pipefail
 
+PX4_VERSION="v1.17.0"
+
 # make sure PX4 has all of its dependencies (like gazebo, for this sitl script)
 git submodule update --init --recursive
+git -C src/PX4-Autopilot checkout "$PX4_VERSION"
+git -C src/PX4-Autopilot submodule update --init --recursive
 
 IMAGE_NAME="suas-px4-sitl"
-IMAGE_TAG="$IMAGE_NAME:latest"
+IMAGE_TAG="$IMAGE_NAME:$PX4_VERSION"
 DOCKERFILE="docker/sitl.dockerfile"
 
 # Mount the whole repo (not just the submodule) at the same absolute path
