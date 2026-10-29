@@ -8,3 +8,4 @@ runs/
 *.jpg
 main.py
 *.mp4
+src/PX4-Autopilot
