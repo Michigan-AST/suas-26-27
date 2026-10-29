@@ -26,8 +26,8 @@ class StarterFlight(unittest.IsolatedAsyncioTestCase):
                 'goto_location', 'hold', 'set_takeoff_altitude', 'takeoff', 'arm',
             )}),
             telemetry=State(
-                home=lambda: stream(State(latitude_deg=47, longitude_deg=8, absolute_altitude_m=500)),
-                position=lambda: stream(),
+                subscribe_home=lambda: stream(State(latitude_deg=47, longitude_deg=8, absolute_altitude_m=500)),
+                subscribe_position=lambda: stream(),
             ),
             param=State(get_param_float=AsyncMock(return_value=80)),
         )
@@ -51,7 +51,7 @@ class StarterFlight(unittest.IsolatedAsyncioTestCase):
 
     async def test_goto_converts_metres_and_height_to_gps_and_amsl(self):
         longitude = 8 + 500 / (math.pi * 6371000 / 180 * math.cos(math.radians(47)))
-        self.drone.telemetry.position = lambda: stream(
+        self.drone.telemetry.subscribe_position = lambda: stream(
             State(latitude_deg=47, longitude_deg=8, absolute_altitude_m=550),
             State(latitude_deg=47, longitude_deg=longitude, absolute_altitude_m=550),
         )
@@ -69,19 +69,19 @@ class StarterFlight(unittest.IsolatedAsyncioTestCase):
         self.drone.action.goto_location.assert_not_called()
 
     async def test_taking_off_requires_grounded_disarmed_aircraft(self):
-        self.drone.telemetry.armed = lambda: stream(True)
-        self.drone.telemetry.in_air = lambda: stream(True)
+        self.drone.telemetry.subscribe_armed = lambda: stream(True)
+        self.drone.telemetry.subscribe_in_air = lambda: stream(True)
         with self.assertRaises(RuntimeError):
             await flight.takeoff(self.drone, height=50)
         self.drone.action.arm.assert_not_called()
 
     async def test_launch_mode_is_selected_before_arm_and_climb_is_observed(self):
-        self.drone.telemetry.armed = lambda: stream(False)
-        self.drone.telemetry.in_air = Mock(side_effect=[stream(False), stream(True)])
-        self.drone.telemetry.health = lambda: stream(State(
+        self.drone.telemetry.subscribe_armed = lambda: stream(False)
+        self.drone.telemetry.subscribe_in_air = Mock(side_effect=[stream(False), stream(True)])
+        self.drone.telemetry.subscribe_health = lambda: stream(State(
             is_global_position_ok=True, is_home_position_ok=True, is_armable=True,
         ))
-        self.drone.telemetry.position = lambda: stream(
+        self.drone.telemetry.subscribe_position = lambda: stream(
             State(relative_altitude_m=5), State(relative_altitude_m=48),
         )
         steps = []
@@ -107,7 +107,7 @@ class StarterFlight(unittest.IsolatedAsyncioTestCase):
             await flight.wait_for(stream(False), lambda value: value)
 
     async def test_wrong_vehicle_type_is_rejected(self):
-        self.drone.mavlink_direct = State(message=lambda name: stream(
+        self.drone.mavlink_direct = State(subscribe_message=lambda name: stream(
             State(component_id=1, fields_json='{"autopilot":12,"type":2}'),
         ))
         with self.assertRaises(RuntimeError):
