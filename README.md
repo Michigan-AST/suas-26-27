@@ -1,37 +1,92 @@
 # suas-26-27
 
-Code and documentation for the M-AST 2026-27 drone for the S.U.A.S competition
+Code and documentation for the M-AST 2026-27 drone for the S.U.A.S competition.
 
-## PX4 and Gazebo with Docker
+## Prerequisites
 
-On macOS, start Docker Desktop and enable **Settings > Resources > Network > Enable host networking**. Apply this setting and wait for Docker Desktop to finish restarting before starting a build; restarting interrupts active builds. Install QGroundControl on the Mac; it runs outside the container.
+- **Docker Desktop** (macOS/Linux/Windows)
+- **QGroundControl** (installed on host)
+- **Python 3.9+** and `make`
 
-From the repository root:
+## Quick Start
 
-```bash
-bash build_and_run.sh
-```
+### 1. Configure Docker Networking (macOS)
 
-The script builds the `suas` image, opens QGroundControl, and starts PX4 with the X500 Gazebo model in headless mode. It exits if a command fails. In particular, a failed build cannot continue by launching an older image under the same tag.
+In Docker Desktop, navigate to **Settings > Resources > Network** and enable **Enable host networking**. Apply and restart Docker Desktop.
 
-QGroundControl listens on UDP port `14550`. If a manual connection is needed, disable UDP auto-connect and configure a UDP Comm Link with listening port `14550` and remote host `127.0.0.1:18570` for PX4 instance zero.
+### 2. Launch QGroundControl
 
-Stop the simulation from another Mac terminal:
+Open the **QGroundControl** application on your computer. Just leave it running in the background. It listens on UDP port `14550`.
 
-```bash
-docker stop suas-sitl
-```
+### 3. Start the SITL Simulation
 
-### Image export failures
-
-An error such as `failed to receive status ... error reading from server: EOF` while exporting layers indicates that the build client's connection to Docker ended. It does not establish why the connection ended, and the `suas` tag may still refer to an older image. Confirm Docker Desktop is running and retry with detailed output while keeping the build cache:
+From the repository root, start PX4 and the Gazebo simulation:
 
 ```bash
-docker build --progress=plain -f docker/Dockerfile -t suas .
+bash sitl.sh
 ```
 
-After a successful build, the image's working directory should be `/PX4-Autopilot`, and its default command should be `make px4_sitl gz_x500`:
+This builds the `suas-px4-sitl:v1.17.0` image (if not already built) and launches PX4 with the fixed-wing RC Cessna model (`gz_rc_cessna`) in headless mode.
+
+### 4. Run the Python Flight Script
+
+In a _new_ terminal window from the repository root:
 
 ```bash
-docker image inspect suas --format 'Workdir={{.Config.WorkingDir}} Command={{json .Config.Cmd}}'
+# Setup virtual environment and install dependencies (first time or on dependency change)
+make venv
+
+# Run flight instructions
+make run
 ```
+
+The script connects to PX4 over UDP `14540` and executes the autonomous mission defined in `scripts/drone_control.py`.
+
+### 5. Stop the Simulation
+
+To shut down the simulation container:
+
+```bash
+docker stop suas-px4-sitl
+```
+
+---
+
+## Python Development & Testing
+
+- **Edit Flight Instructions**: Modify `flight_instructions()` at the top of [`scripts/drone_control.py`](scripts/drone_control.py).
+
+- **Run Tests**:
+  ```bash
+  make test
+  ```
+- **Custom Python Interpreter**:
+  ```bash
+  make venv PYTHON=python3.11
+  ```
+
+---
+
+## Troubleshooting
+
+### QGroundControl Connection
+
+If QGroundControl does not connect automatically:
+
+1. Open **Application Settings > Comm Links**.
+2. Disable UDP auto-connect.
+3. Add a manual UDP link with listening port `14550` and target host `127.0.0.1:18570`.
+
+### Docker Image Export Failures
+
+If you see `failed to receive status ... error reading from server: EOF` during layer export:
+
+1. Confirm Docker Desktop is running and has sufficient disk space/memory allocated.
+2. Rebuild directly with detailed output:
+   ```bash
+   docker build --progress=plain -f docker/sitl.dockerfile -t suas-px4-sitl:v1.17.0 .
+   ```
+3. Inspect the image configuration:
+   ```bash
+   docker image inspect suas-px4-sitl:v1.17.0 --format 'Workdir={{.Config.WorkingDir}} Command={{json .Config.Cmd}}'
+   ```
