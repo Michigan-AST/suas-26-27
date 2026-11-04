@@ -8,17 +8,33 @@ import asyncio
 import json
 import math
 import signal
-from types import SimpleNamespace
+from collections.abc import AsyncGenerator, Awaitable, Callable
+from dataclasses import dataclass
+from typing import TypeVar
 
-from mavsdk.asyncio import ComponentType, Configuration, Mavsdk
+from mavsdk.asyncio import ComponentType, Configuration, Mavsdk, System
 from mavsdk.asyncio.plugins.action import ActionAsync
 from mavsdk.asyncio.plugins.mavlink_direct import MavlinkDirectAsync
 from mavsdk.asyncio.plugins.mission_raw import MissionItem, MissionRawAsync
 from mavsdk.asyncio.plugins.param import ParamAsync
-from mavsdk.asyncio.plugins.telemetry import TelemetryAsync
+from mavsdk.asyncio.plugins.telemetry import Position, TelemetryAsync
+
+T = TypeVar("T")
 
 
-async def flight_instructions(drone):
+@dataclass
+class Drone:
+    """The connected aircraft and the MAVSDK plugins used to control it."""
+
+    system: System
+    action: ActionAsync
+    mavlink_direct: MavlinkDirectAsync
+    mission_raw: MissionRawAsync
+    param: ParamAsync
+    telemetry: TelemetryAsync
+
+
+async def flight_instructions(drone: Drone) -> None:
     # START HERE: write your flight instructions in order below.
     # Distances are metres NORTH and EAST of home. Height is metres above home.
     # 'await' waits for a step to finish before moving to the next instruction.
@@ -39,14 +55,18 @@ async def flight_instructions(drone):
 
 # Helper functions: you should not need to edit these for your first flight.
 
-async def command(operation):
+async def command(operation: Awaitable[T]) -> T:
     """Send one SDK request, with a timeout if PX4 does not respond."""
     return await asyncio.wait_for(operation, timeout=15)
 
 
-async def wait_for(stream, condition, timeout=180):
+async def wait_for(
+    stream: AsyncGenerator[T, None],
+    condition: Callable[[T], object],
+    timeout: float = 180,
+) -> T:
     """Watch telemetry until a condition is met, instead of guessing a delay."""
-    async def watch():
+    async def watch() -> T:
         try:
             async for value in stream:
                 if condition(value):
@@ -58,9 +78,9 @@ async def wait_for(stream, condition, timeout=180):
     return await asyncio.wait_for(watch(), timeout=timeout)
 
 
-async def check_aircraft(drone):
+async def check_aircraft(drone: Drone) -> None:
     """Check that we connected to a conventional PX4 fixed-wing aircraft."""
-    async def check():
+    async def check() -> None:
         stream = drone.mavlink_direct.subscribe_message("HEARTBEAT")
         try:
             async for message in stream:
@@ -76,7 +96,7 @@ async def check_aircraft(drone):
     await asyncio.wait_for(check(), timeout=15)
 
 
-async def takeoff(drone, height):
+async def takeoff(drone: Drone, height: float) -> None:
     """Use the configured fixed-wing launch procedure, then wait for climbout."""
     if not math.isfinite(height) or not 30 <= height <= 150:
         raise ValueError("Use a takeoff height between 30 and 150 metres")
@@ -107,7 +127,7 @@ async def takeoff(drone, height):
     print("Takeoff complete.")
 
 
-async def land_at(drone, north=0, east=0, runway_heading_deg=0):
+async def land_at(drone: Drone, north: float = 0, east: float = 0, runway_heading_deg: float = 0) -> None:
     """Fly an autonomous fixed-wing landing approach to touchdown coordinates.
 
     Args:
@@ -122,11 +142,13 @@ async def land_at(drone, north=0, east=0, runway_heading_deg=0):
     if math.hypot(north, east) > 2000:
         raise ValueError("Keep landing target within 2 km of home")
 
+    # Home is the starting position perchance
     home = await wait_for(drone.telemetry.subscribe_home(), lambda value: True, timeout=10)
     cosine = math.cos(math.radians(home.latitude_deg))
     if abs(cosine) < 0.01:
-        raise ValueError("This example does not support flights near the poles")
+        raise ValueError("Does not support flights near the poles")
 
+    # Convert coordinates to meters
     metres_per_degree = math.pi * 6_371_000 / 180
     touchdown_lat = home.latitude_deg + north / metres_per_degree
     touchdown_lon = (home.longitude_deg + east / (metres_per_degree * cosine) + 180) % 360 - 180
@@ -141,9 +163,11 @@ async def land_at(drone, north=0, east=0, runway_heading_deg=0):
     approach_north = north - approach_distance * math.cos(rad)
     approach_east = east - approach_distance * math.sin(rad)
 
+    # Convert approach back into latitude and longitude
     approach_lat = home.latitude_deg + approach_north / metres_per_degree
     approach_lon = (home.longitude_deg + approach_east / (metres_per_degree * cosine) + 180) % 360 - 180
 
+    # Get the current orbit radius
     radius = await command(drone.param.get_param_float("NAV_LOITER_RAD"))
     loiter_radius = max(50.0, abs(radius))
 
@@ -158,7 +182,7 @@ async def land_at(drone, north=0, east=0, runway_heading_deg=0):
             command=189,  # MAV_CMD_DO_LAND_START
             current=1,
             autocontinue=1,
-            param1=0.0,
+            param1=0.0, 
             param2=0.0,
             param3=0.0,
             param4=0.0,
@@ -199,6 +223,7 @@ async def land_at(drone, north=0, east=0, runway_heading_deg=0):
         ),
     ]
 
+    # Upload the landing mission and start it
     print(f"Uploading landing mission to ({north:g} m N, {east:g} m E, heading {runway_heading_deg:g}°)...")
     await command(drone.mission_raw.upload_mission(items))
     await asyncio.sleep(1)
@@ -219,12 +244,12 @@ async def land_at(drone, north=0, east=0, runway_heading_deg=0):
     print("Landed and disarmed.")
 
 
-async def land(drone):
+async def land(drone: Drone) -> None:
     """Land at the home position (north=0, east=0) facing North (0 deg)."""
     await land_at(drone, north=0, east=0, runway_heading_deg=0)
 
 
-async def fly_to(drone, north, east, height):
+async def fly_to(drone: Drone, north: float, east: float, height: float) -> None:
     """Fly near a point given in metres north/east of home at the given height."""
     if not all(math.isfinite(value) for value in (north, east, height)):
         raise ValueError("Distances and height must be finite numbers")
@@ -250,7 +275,7 @@ async def fly_to(drone, north, east, height):
     print(f"Flying to north={north:g} m, east={east:g} m, height={height:g} m...")
     await command(drone.action.goto_location(latitude, longitude, altitude, math.nan))
 
-    def arrived(position):
+    def arrived(position: Position) -> bool:
         delta_lon = (position.longitude_deg - longitude + 180) % 360 - 180
         distance = math.hypot(
             (position.latitude_deg - latitude) * metres_per_degree,
@@ -262,15 +287,15 @@ async def fly_to(drone, north, east, height):
     print("Waypoint reached (within the turn radius).")
 
 
-async def loiter(drone):
+async def loiter(drone: Drone) -> None:
     """Keep flying in a circle using PX4's Hold mode."""
     await command(drone.action.hold())
     print("Loitering. Monitor the plane in QGroundControl.")
 
 
-async def main():
+async def main() -> None:
     config = Configuration.create_with_component_type(ComponentType.GROUND_STATION)
-    drone = None
+    drone: Drone | None = None
     verified = False
 
     # Let Ctrl-C cancel the flight steps and reach the cleanup block below.
@@ -289,7 +314,7 @@ async def main():
             if not await system.is_connected():
                 await wait_for(system.is_connected_state(), lambda connected: connected, timeout=20)
 
-            drone = SimpleNamespace(
+            drone = Drone(
                 system=system,
                 action=ActionAsync(system),
                 mavlink_direct=MavlinkDirectAsync(system),
