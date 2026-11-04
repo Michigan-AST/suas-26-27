@@ -13,6 +13,7 @@ from types import SimpleNamespace
 from mavsdk.asyncio import ComponentType, Configuration, Mavsdk
 from mavsdk.asyncio.plugins.action import ActionAsync
 from mavsdk.asyncio.plugins.mavlink_direct import MavlinkDirectAsync
+from mavsdk.asyncio.plugins.mission_raw import MissionItem, MissionRawAsync
 from mavsdk.asyncio.plugins.param import ParamAsync
 from mavsdk.asyncio.plugins.telemetry import TelemetryAsync
 
@@ -31,8 +32,9 @@ async def flight_instructions(drone):
     await fly_to(drone, north=0, east=0, height=50)
     await fly_to(drone, north=0, east=500, height=50)
 
-    # A fixed-wing plane cannot hover. Finish by circling at this location.
-    await loiter(drone)
+    # Approach and land at home (north=0, east=0) facing North (runway heading 0 deg).
+    # (To loiter indefinitely instead of landing, use: await loiter(drone))
+    await land_at(drone, north=0, east=0, runway_heading_deg=0)
 
 
 # Helper functions: you should not need to edit these for your first flight.
@@ -105,6 +107,123 @@ async def takeoff(drone, height):
     print("Takeoff complete.")
 
 
+async def land_at(drone, north=0, east=0, runway_heading_deg=0):
+    """Fly an autonomous fixed-wing landing approach to touchdown coordinates.
+
+    Args:
+        drone: The MAVSDK drone instance.
+        north: Metres north of home for the touchdown point.
+        east: Metres east of home for the touchdown point.
+        runway_heading_deg: Direction the aircraft flies along the runway
+            (0 = North, 90 = East, 180 = South, 270 = West).
+    """
+    if not all(math.isfinite(value) for value in (north, east, runway_heading_deg)):
+        raise ValueError("Distances and heading must be finite numbers")
+    if math.hypot(north, east) > 2000:
+        raise ValueError("Keep landing target within 2 km of home")
+
+    home = await wait_for(drone.telemetry.subscribe_home(), lambda value: True, timeout=10)
+    cosine = math.cos(math.radians(home.latitude_deg))
+    if abs(cosine) < 0.01:
+        raise ValueError("This example does not support flights near the poles")
+
+    metres_per_degree = math.pi * 6_371_000 / 180
+    touchdown_lat = home.latitude_deg + north / metres_per_degree
+    touchdown_lon = (home.longitude_deg + east / (metres_per_degree * cosine) + 180) % 360 - 180
+
+    # Calculate approach waypoint:
+    # A standard fixed-wing landing glideslope must be <= FW_LND_ANG (typically 5-8 deg).
+    # With 25 m approach height and 350 m approach distance, the glide slope is
+    # ~4.1 deg, well within limits.
+    approach_distance = 350.0
+    approach_height = 25.0
+    rad = math.radians(runway_heading_deg)
+    approach_north = north - approach_distance * math.cos(rad)
+    approach_east = east - approach_distance * math.sin(rad)
+
+    approach_lat = home.latitude_deg + approach_north / metres_per_degree
+    approach_lon = (home.longitude_deg + approach_east / (metres_per_degree * cosine) + 180) % 360 - 180
+
+    radius = await command(drone.param.get_param_float("NAV_LOITER_RAD"))
+    loiter_radius = max(50.0, abs(radius))
+
+    # MAVLink Fixed-Wing Landing Pattern:
+    # 1. MAV_CMD_DO_LAND_START (189): signals autopilot start of landing pattern
+    # 2. MAV_CMD_NAV_LOITER_TO_ALT (31): loiter down to approach height, exit tangent
+    # 3. MAV_CMD_NAV_LAND (21): final descent, flare, and touchdown
+    items = [
+        MissionItem(
+            seq=0,
+            frame=2,  # MAV_FRAME_MISSION
+            command=189,  # MAV_CMD_DO_LAND_START
+            current=1,
+            autocontinue=1,
+            param1=0.0,
+            param2=0.0,
+            param3=0.0,
+            param4=0.0,
+            x=0,
+            y=0,
+            z=0.0,
+            mission_type=0,
+        ),
+        MissionItem(
+            seq=1,
+            frame=3,  # MAV_FRAME_GLOBAL_RELATIVE_ALT
+            command=31,  # MAV_CMD_NAV_LOITER_TO_ALT
+            current=0,
+            autocontinue=1,
+            param1=1.0,  # Heading required
+            param2=float(loiter_radius),  # Loiter radius
+            param3=0.0,
+            param4=1.0,  # Tangent exit heading towards touchdown
+            x=int(round(approach_lat * 1e7)),
+            y=int(round(approach_lon * 1e7)),
+            z=float(approach_height),
+            mission_type=0,
+        ),
+        MissionItem(
+            seq=2,
+            frame=3,  # MAV_FRAME_GLOBAL_RELATIVE_ALT
+            command=21,  # MAV_CMD_NAV_LAND
+            current=0,
+            autocontinue=1,
+            param1=float(approach_height),  # Abort altitude
+            param2=0.0,
+            param3=0.0,
+            param4=0.0,
+            x=int(round(touchdown_lat * 1e7)),
+            y=int(round(touchdown_lon * 1e7)),
+            z=0.0,  # Touchdown at relative altitude 0 m
+            mission_type=0,
+        ),
+    ]
+
+    print(f"Uploading landing mission to ({north:g} m N, {east:g} m E, heading {runway_heading_deg:g}°)...")
+    await command(drone.mission_raw.upload_mission(items))
+    await asyncio.sleep(1)
+    await command(drone.mission_raw.set_current_mission_item(0))
+    await command(drone.mission_raw.start_mission())
+    print("Flying the landing approach...")
+
+    await wait_for(
+        drone.telemetry.subscribe_in_air(),
+        lambda flying: not flying,
+        timeout=300,
+    )
+    await wait_for(
+        drone.telemetry.subscribe_armed(),
+        lambda armed: not armed,
+        timeout=30,
+    )
+    print("Landed and disarmed.")
+
+
+async def land(drone):
+    """Land at the home position (north=0, east=0) facing North (0 deg)."""
+    await land_at(drone, north=0, east=0, runway_heading_deg=0)
+
+
 async def fly_to(drone, north, east, height):
     """Fly near a point given in metres north/east of home at the given height."""
     if not all(math.isfinite(value) for value in (north, east, height)):
@@ -174,6 +293,7 @@ async def main():
                 system=system,
                 action=ActionAsync(system),
                 mavlink_direct=MavlinkDirectAsync(system),
+                mission_raw=MissionRawAsync(system),
                 param=ParamAsync(system),
                 telemetry=TelemetryAsync(system),
             )
@@ -181,10 +301,15 @@ async def main():
             verified = True
 
             await flight_instructions(drone)
-            print("Loop complete! Keeping the connection open. Ctrl-C disconnects.")
 
-            # Keep sending the SDK heartbeat while the plane loiters.
-            await asyncio.Event().wait()
+            # If the flight finished with landing, the aircraft is on the ground.
+            # If it finished with loiter(), keep the connection open until Ctrl-C.
+            in_air = await wait_for(drone.telemetry.subscribe_in_air(), lambda value: True, timeout=5)
+            if in_air:
+                print("Flight instructions finished; plane is in the air. Ctrl-C disconnects.")
+                await asyncio.Event().wait()
+            else:
+                print("Flight instructions and landing complete.")
 
         except asyncio.CancelledError:
             print("\nStopping the script...")

@@ -25,9 +25,14 @@ class StarterFlight(unittest.IsolatedAsyncioTestCase):
             action=State(**{name: AsyncMock() for name in (
                 'goto_location', 'hold', 'set_takeoff_altitude', 'takeoff', 'arm',
             )}),
+            mission_raw=State(**{name: AsyncMock() for name in (
+                'upload_mission', 'set_current_mission_item', 'start_mission',
+            )}),
             telemetry=State(
                 subscribe_home=lambda: stream(State(latitude_deg=47, longitude_deg=8, absolute_altitude_m=500)),
                 subscribe_position=lambda: stream(),
+                subscribe_in_air=lambda: stream(False),
+                subscribe_armed=lambda: stream(False),
             ),
             param=State(get_param_float=AsyncMock(return_value=80)),
         )
@@ -38,12 +43,12 @@ class StarterFlight(unittest.IsolatedAsyncioTestCase):
             steps.append(('takeoff', height))
         async def fly_to(drone, north, east, height):
             steps.append((north, east, height))
-        async def loiter(drone):
-            steps.append(('loiter',))
-        with patch.multiple(flight, takeoff=takeoff, fly_to=fly_to, loiter=loiter):
+        async def land_at(drone, north, east, runway_heading_deg):
+            steps.append(('land_at', north, east, runway_heading_deg))
+        with patch.multiple(flight, takeoff=takeoff, fly_to=fly_to, land_at=land_at):
             await flight.flight_instructions(self.drone)
         self.assertEqual(steps[0], ('takeoff', 50))
-        self.assertEqual(steps[-1], ('loiter',))
+        self.assertEqual(steps[-1], ('land_at', 0, 0, 0))
         corners = steps[1:-1]
         self.assertEqual(corners[0], corners[-1])
         self.assertEqual(len(set(corners)), 4)
@@ -112,6 +117,35 @@ class StarterFlight(unittest.IsolatedAsyncioTestCase):
         ))
         with self.assertRaises(RuntimeError):
             await flight.check_aircraft(self.drone)
+
+    async def test_land_at_uploads_fixed_wing_landing_pattern(self):
+        await flight.land_at(self.drone, north=0, east=0, runway_heading_deg=0)
+        self.drone.mission_raw.upload_mission.assert_called_once()
+        items = self.drone.mission_raw.upload_mission.call_args.args[0]
+        self.assertEqual(len(items), 3)
+
+        # 1. DO_LAND_START (189)
+        self.assertEqual(items[0].command, 189)
+        self.assertEqual(items[0].frame, 2)
+
+        # 2. NAV_LOITER_TO_ALT (31) approach waypoint
+        self.assertEqual(items[1].command, 31)
+        self.assertEqual(items[1].frame, 3)
+        self.assertEqual(items[1].z, 25.0)
+
+        # 3. NAV_LAND (21) touchdown waypoint
+        self.assertEqual(items[2].command, 21)
+        self.assertEqual(items[2].frame, 3)
+        self.assertEqual(items[2].z, 0.0)
+
+        self.drone.mission_raw.set_current_mission_item.assert_called_once_with(0)
+        self.drone.mission_raw.start_mission.assert_called_once()
+
+    async def test_land_at_validates_inputs(self):
+        for north, east, heading in [(math.nan, 0, 0), (0, 3000, 0), (0, 0, math.nan)]:
+            with self.assertRaises(ValueError):
+                await flight.land_at(self.drone, north, east, heading)
+        self.drone.mission_raw.upload_mission.assert_not_called()
 
 
 if __name__ == '__main__':
