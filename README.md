@@ -51,7 +51,34 @@ make run
 
 The script connects to PX4 over UDP `14540` and executes the autonomous mission defined in `scripts/drone_control.py`.
 
-### 5. Stop the Simulation
+### 5. View the Drone in 3D (Foxglove Studio)
+
+To see the drone in 3D with real-time attitude, altitude/airspeed plots, and GPS satellite tracking:
+
+1. **Open Foxglove Studio**:
+   - **In your browser (zero-install)**: Go to [https://app.foxglove.dev](https://app.foxglove.dev)
+   - **Or native macOS app**: `brew install --cask foxglove`
+2. **Load the SUAS Layout**:
+   - In Foxglove Studio, click **Layout** (top bar) > **Import from file...** and select [`foxglove_layout.json`](foxglove_layout.json).
+3. **Connect to SITL**:
+   - Click **Open connection** > select **Foxglove WebSocket**.
+   - Set the URL to `ws://localhost:8765` and click **Open**.
+
+Whenever you run `make run`, 3D transforms and telemetry will stream automatically. You can also run `make foxglove` anytime to monitor SITL telemetry without flying the autonomous mission.
+
+#### Following the Drone
+
+[`foxglove_layout.json`](foxglove_layout.json) is pre-configured to follow the drone automatically. If the camera loses lock after manually panning or zooming:
+
+- **3D Panel**:
+  - Open panel settings (**gear icon** in the top right of the 3D panel).
+  - Under **Camera**, set **Follow mode** to **Follow** (or _Following_) and **Follow frame** to **`drone`**.
+  - Click the crosshair/re-center icon on the 3D toolbar to re-snap to the vehicle.
+- **Map Panel**:
+  - Click the **crosshair / target icon** in the top bar of the map.
+  - Or in panel settings, set **Follow topic** to **`/gps`**.
+
+### 6. Stop the Simulation
 
 To shut down the simulation container:
 

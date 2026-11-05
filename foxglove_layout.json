@@ -1,0 +1,112 @@
+{
+  "configById": {
+    "3D!1": {
+      "cameraState": {
+        "perspective": true,
+        "distance": 35,
+        "phi": 60,
+        "theta": 30,
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1]
+      },
+      "followMode": "following",
+      "followTf": "drone",
+      "layers": {
+        "grid": {
+          "visible": true,
+          "size": 200,
+          "divisions": 20,
+          "lineWidth": 1,
+          "color": "#333333"
+        }
+      },
+      "topics": {
+        "/tf": {
+          "visible": true
+        },
+        "/scene": {
+          "visible": true
+        }
+      }
+    },
+    "Plot!1": {
+      "title": "Altitude & Airspeed",
+      "showLegend": true,
+      "legendPosition": "top",
+      "paths": [
+        {
+          "value": "/telemetry.altitude_rel_m",
+          "enabled": true,
+          "label": "Rel Altitude (m)",
+          "color": "#00d2ff"
+        },
+        {
+          "value": "/telemetry.airspeed_m_s",
+          "enabled": true,
+          "label": "Airspeed (m/s)",
+          "color": "#ff9f1c"
+        },
+        {
+          "value": "/telemetry.climb_rate_m_s",
+          "enabled": false,
+          "label": "Climb Rate (m/s)",
+          "color": "#2ec4b6"
+        }
+      ]
+    },
+    "Plot!2": {
+      "title": "Attitude (Pitch & Roll)",
+      "showLegend": true,
+      "legendPosition": "top",
+      "paths": [
+        {
+          "value": "/telemetry.pitch_deg",
+          "enabled": true,
+          "label": "Pitch (deg)",
+          "color": "#e71d36"
+        },
+        {
+          "value": "/telemetry.roll_deg",
+          "enabled": true,
+          "label": "Roll (deg)",
+          "color": "#a78bfa"
+        },
+        {
+          "value": "/telemetry.yaw_deg",
+          "enabled": false,
+          "label": "Yaw (deg)",
+          "color": "#ffd166"
+        }
+      ]
+    },
+    "Map!1": {
+      "center": [47.397742, 8.545594],
+      "zoom": 16,
+      "followTopic": "/gps",
+      "layer": "satellite"
+    }
+  },
+  "globalVariables": {},
+  "userNodes": {},
+  "playbackConfig": {
+    "speed": 1
+  },
+  "layout": {
+    "direction": "row",
+    "first": "3D!1",
+    "second": {
+      "direction": "column",
+      "first": {
+        "direction": "row",
+        "first": "Plot!1",
+        "second": "Plot!2",
+        "splitPercentage": 50
+      },
+      "second": "Map!1",
+      "splitPercentage": 45
+    },
+    "splitPercentage": 58
+  }
+}
+

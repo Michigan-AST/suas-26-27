@@ -1,1 +1,2 @@
 mavsdk==4.1.0
+foxglove-sdk>=0.15.0

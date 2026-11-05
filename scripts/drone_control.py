@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Student starter code: take off, fly a square loop, and loiter in PX4 SITL."""
 
+from __future__ import annotations
+
 # .venv/bin/python scripts/drone_control.py
 
 
@@ -310,6 +312,7 @@ async def main() -> None:
         loop.add_signal_handler(sig, task.cancel)  # type: ignore
 
     async with Mavsdk(config) as sdk:
+        foxglove_task: asyncio.Task | None = None
         try:
             print("Connecting to the simulator...")
             await sdk.add_any_connection("udpin://0.0.0.0:14540")
@@ -330,6 +333,13 @@ async def main() -> None:
             await check_aircraft(drone)
             verified = True
 
+            # Start streaming 3D telemetry to Foxglove Studio (port 8765) in the background
+            try:
+                from foxglove_bridge import run_foxglove_telemetry_loop
+                foxglove_task = asyncio.create_task(run_foxglove_telemetry_loop(drone))
+            except Exception as stream_err:
+                print(f"Note: Foxglove 3D telemetry stream not started: {stream_err}")
+
             await flight_instructions(drone)
 
             # If the flight finished with landing, the aircraft is on the ground.
@@ -346,6 +356,8 @@ async def main() -> None:
         except Exception as error:
             print(f"Flight stopped: {str(error) or type(error).__name__}")
         finally:
+            if foxglove_task is not None:
+                foxglove_task.cancel()
             try:
                 if verified and drone is not None:
                     in_air = await wait_for(drone.telemetry.subscribe_in_air(), lambda value: True, timeout=5)
