@@ -34,7 +34,10 @@ class StarterFlight(unittest.IsolatedAsyncioTestCase):
                 subscribe_in_air=lambda: stream(False),
                 subscribe_armed=lambda: stream(False),
             ),
-            param=State(get_param_float=AsyncMock(return_value=80)),
+            param=State(
+                get_param_float=AsyncMock(return_value=80),
+                set_param_int=AsyncMock(),
+            ),
         )
 
     async def test_sample_flies_a_closed_loop_after_takeoff(self):
@@ -120,6 +123,8 @@ class StarterFlight(unittest.IsolatedAsyncioTestCase):
 
     async def test_land_at_uploads_fixed_wing_landing_pattern(self):
         await flight.land_at(self.drone, north=0, east=0, runway_heading_deg=0)
+        self.drone.param.set_param_int.assert_any_call("FW_LND_USETER", 0)
+        self.drone.param.set_param_int.assert_any_call("FW_LND_ABORT", 0)
         self.drone.mission_raw.upload_mission.assert_called_once()
         items = self.drone.mission_raw.upload_mission.call_args.args[0]
         self.assertEqual(len(items), 3)
