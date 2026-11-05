@@ -167,6 +167,11 @@ async def land_at(drone: Drone, north: float = 0, east: float = 0, runway_headin
     approach_lat = home.latitude_deg + approach_north / metres_per_degree
     approach_lon = (home.longitude_deg + approach_east / (metres_per_degree * cosine) + 180) % 360 - 180
 
+    # Disable terrain estimation and missing-terrain aborts so aircraft without
+    # a lidar / rangefinder (such as the SITL model) can land cleanly.
+    await command(drone.param.set_param_int("FW_LND_USETER", 0))
+    await command(drone.param.set_param_int("FW_LND_ABORT", 0))
+
     # Get the current orbit radius
     radius = await command(drone.param.get_param_float("NAV_LOITER_RAD"))
     loiter_radius = max(50.0, abs(radius))
