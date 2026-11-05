@@ -13,15 +13,29 @@ set -euxo pipefail
 
 PX4_VERSION="v1.17.0"
 
-# Parse arguments: check for --rebuild flag and forward any remaining arguments
+# Parse arguments: check for flags and forward any remaining arguments
 REBUILD=0
+SPEED_FACTOR="${PX4_SIM_SPEED_FACTOR:-}"
 RUN_ARGS=()
-for arg in "$@"; do
-    if [[ "$arg" == "--rebuild" ]]; then
-        REBUILD=1
-    else
-        RUN_ARGS+=("$arg")
-    fi
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --rebuild)
+            REBUILD=1
+            shift
+            ;;
+        --speed|-s)
+            SPEED_FACTOR="$2"
+            shift 2
+            ;;
+        --speed=*)
+            SPEED_FACTOR="${1#*=}"
+            shift
+            ;;
+        *)
+            RUN_ARGS+=("$1")
+            shift
+            ;;
+    esac
 done
 
 # Only checkout and update submodules if not already at PX4_VERSION
@@ -65,6 +79,7 @@ fi
 
 docker run -it --rm \
     --env=LOCAL_USER_ID="$(id -u)" \
+    --env=PX4_SIM_SPEED_FACTOR="${SPEED_FACTOR}" \
     --volume="${REPO_ROOT}:${REPO_ROOT}:rw" \
     --volume=/tmp/.X11-unix:/tmp/.X11-unix:rw \
     --env=DISPLAY="${DISPLAY:-:0}" \

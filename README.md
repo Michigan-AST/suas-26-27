@@ -28,6 +28,13 @@ From the repository root, start PX4 and the Gazebo simulation:
 bash sitl.sh
 ```
 
+To speed up the simulation (e.g. 2x real-time speed):
+
+```bash
+bash sitl.sh --speed 2
+# or: PX4_SIM_SPEED_FACTOR=2 bash sitl.sh
+```
+
 This builds the `suas-px4-sitl:v1.17.0` image (if not already built) and launches PX4 with the fixed-wing RC Cessna model (`gz_rc_cessna`) in headless mode.
 
 ### 4. Run the Python Flight Script
