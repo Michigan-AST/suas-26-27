@@ -11,8 +11,8 @@ RUN apt update && apt install -y \
 # Copy PX4 Autopilot Setup into the Docker Container
 COPY src/PX4-Autopilot/Tools/setup/ /tmp/px4-setup/
 
-# Run PX4 Setup inside the container
-RUN RUNS_IN_DOCKER=true bash /tmp/px4-setup/ubuntu.sh && rm -rf /tmp/px4-setup
+# Run PX4 Setup inside the container (skip NuttX ARM cross-toolchain since SITL runs natively)
+RUN RUNS_IN_DOCKER=true bash /tmp/px4-setup/ubuntu.sh --no-nuttx && rm -rf /tmp/px4-setup
 
 # the container runs as root but the source is bind-mounted in from the
 # host (owned by the host user), so git refuses it as "dubious ownership"

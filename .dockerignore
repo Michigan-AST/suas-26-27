@@ -1,0 +1,21 @@
+# Ignore git metadata
+**/.git
+.gitignore
+.gitmodules
+
+# Ignore build artifacts
+**/build/
+*.o
+*.a
+*.so
+
+# Python virtual environment and cache
+.venv/
+**/__pycache__/
+*.py[cod]
+
+# Documentation and project files
+README.md
+docs/
+.vscode/
+

@@ -13,10 +13,27 @@ set -euxo pipefail
 
 PX4_VERSION="v1.17.0"
 
-# make sure PX4 has all of its dependencies (like gazebo, for this sitl script)
-git submodule update --init --recursive
-git -C src/PX4-Autopilot checkout "$PX4_VERSION"
-git -C src/PX4-Autopilot submodule update --init --recursive
+# Parse arguments: check for --rebuild flag and forward any remaining arguments
+REBUILD=0
+RUN_ARGS=()
+for arg in "$@"; do
+    if [[ "$arg" == "--rebuild" ]]; then
+        REBUILD=1
+    else
+        RUN_ARGS+=("$arg")
+    fi
+done
+
+# Only checkout and update submodules if not already at PX4_VERSION
+CURRENT_PX4_COMMIT="$(git -C src/PX4-Autopilot rev-parse HEAD 2>/dev/null || true)"
+TARGET_PX4_COMMIT="$(git -C src/PX4-Autopilot rev-parse "$PX4_VERSION^{commit}" 2>/dev/null || true)"
+
+if [ ! -f "src/PX4-Autopilot/Makefile" ] || [ -z "$CURRENT_PX4_COMMIT" ] || [ "$CURRENT_PX4_COMMIT" != "$TARGET_PX4_COMMIT" ]; then
+    echo "Initializing or updating PX4 submodules for $PX4_VERSION..."
+    git submodule update --init --recursive
+    git -C src/PX4-Autopilot checkout "$PX4_VERSION"
+    git -C src/PX4-Autopilot submodule update --init --recursive
+fi
 
 IMAGE_NAME="suas-px4-sitl"
 IMAGE_TAG="$IMAGE_NAME:$PX4_VERSION"
@@ -35,7 +52,13 @@ REPO_ROOT="$(pwd)"
 # since PX4 runs `git describe`, we need it to be able to see the actual source code
 PX4_SRC="${REPO_ROOT}/src/PX4-Autopilot"
 
-docker build -t "$IMAGE_TAG" -f "$DOCKERFILE" .
+# Only build the image if it doesn't already exist or if --rebuild is explicitly requested
+if [[ "$REBUILD" -eq 1 ]] || ! docker image inspect "$IMAGE_TAG" >/dev/null 2>&1; then
+    echo "Building Docker image $IMAGE_TAG..."
+    docker build -t "$IMAGE_TAG" -f "$DOCKERFILE" .
+else
+    echo "Docker image $IMAGE_TAG already exists. Skipping build (pass --rebuild to force)."
+fi
 
 # Enable access to xhost from the container (for Gazebo GUI, if not headless)
 # xhost +local:root
@@ -48,6 +71,6 @@ docker run -it --rm \
     --network host \
     --workdir="${PX4_SRC}" \
     --name=suas-px4-sitl \
-    "$IMAGE_TAG" "$@"
+    "$IMAGE_TAG" "${RUN_ARGS[@]+"${RUN_ARGS[@]}"}"
 
 # Stop with docker stop suas-px4-sitl
