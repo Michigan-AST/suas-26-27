@@ -266,20 +266,28 @@ async def land_at(drone: Drone, north: float = 0, east: float = 0, runway_headin
     print(f"Uploading landing mission to ({north:g} m N, {east:g} m E, heading {runway_heading_deg:g}°)...")
     await command(drone.mission_raw.upload_mission(items))
     await asyncio.sleep(1)
+
+    # Start the landing mission
     await command(drone.mission_raw.set_current_mission_item(0))
     await command(drone.mission_raw.start_mission())
+
     print("Flying the landing approach...")
 
+    # Wait for landing
     await wait_for(
         drone.telemetry.subscribe_in_air(),
         lambda flying: not flying,
         timeout=300,
     )
+
+    # Wait until the aircraft is disarmed (PX4 disarms automatically after landing)
     await wait_for(
         drone.telemetry.subscribe_armed(),
         lambda armed: not armed,
         timeout=30,
     )
+
+    # Finish landing
     print("Landed and disarmed.")
 
 

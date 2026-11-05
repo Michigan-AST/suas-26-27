@@ -25,7 +25,10 @@ ENV HEADLESS=1
 WORKDIR /PX4-Autopilot
 
 # make px4_sitl gz_x500 (Make gazebo simulation for the x500 drone)
-CMD ["make", "px4_sitl", "gz_rc_cessna"]
+
+ARG MODE="px4_sitl"
+
+CMD ["make", MODE, "gz_rc_cessna"]
 
 # to make for an ARM controller instead (like on the drone)
 # we have to run `make px4_fmu-v6x_default` instead of 

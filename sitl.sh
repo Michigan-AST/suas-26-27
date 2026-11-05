@@ -77,6 +77,12 @@ fi
 # Enable access to xhost from the container (for Gazebo GUI, if not headless)
 # xhost +local:root
 
+
+
+
+docker compose 
+
+
 docker run -it --rm \
     --env=LOCAL_USER_ID="$(id -u)" \
     --env=PX4_SIM_SPEED_FACTOR="${SPEED_FACTOR}" \

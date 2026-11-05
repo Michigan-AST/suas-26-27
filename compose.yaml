@@ -1,0 +1,28 @@
+services:
+# we list a service for each docker container we need to start
+
+  ros:
+    network_mode: host
+    build:
+      context: ./docker/
+      dockerfile: docker/ros.dockerfile
+    image: suas-ros:v1
+    
+    
+  px4:
+    network_mode: host
+    build:
+      # PX4 copies from src/, so it needs to see the root directory
+      context: .
+      dockerfile: docker/px4.dockerfile
+    image: suas-px4:v1.17.0 # where the image is stored when build
+
+  xrce:
+    network_mode: host
+    build:
+      context: ./docker/ # what files the image can see
+      dockerfile: docker/xrce.dockerfile
+    image: suas-xrce:v2.4.3  # where the image is stored when build
+    ports:
+      - "${APP_PORT}:8888" # maps on the host to port 8888 on the container
+    
