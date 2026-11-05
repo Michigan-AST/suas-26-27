@@ -14,6 +14,8 @@ Code and documentation for the M-AST 2026-27 drone for the S.U.A.S competition.
 
 In Docker Desktop, navigate to **Settings > Resources > Network** and enable **Enable host networking**. Apply and restart Docker Desktop.
 
+Make sure Docker Desktop is running, if you're using it.
+
 ### 2. Launch QGroundControl
 
 Open the **QGroundControl** application on your computer. Just leave it running in the background. It listens on UDP port `14550`.
