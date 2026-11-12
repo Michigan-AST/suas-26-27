@@ -5,7 +5,7 @@ Edit **`flight_instructions()` at the top of `drone_control.py`**, under
 below handle the PX4 connection and telemetry.
 
 The sample takes off to 50 m, flies one 500 m square loop, and lands at
-home. Coordinates are **metres north/east of home**, and height is **metres
+home. Coordinates are **meters north/east of home**, and height is **meters
 above home**, not height above the terrain. `await` waits for each step's
 telemetry before starting the next step. Fixed-wing turns round the corners;
 this is an approximate square, with arrival tolerance based on PX4's loiter radius.

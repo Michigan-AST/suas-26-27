@@ -6,13 +6,17 @@ from __future__ import annotations
 # .venv/bin/python scripts/drone_control.py
 
 
+import argparse
 import asyncio
 import json
 import math
+from pathlib import Path
 import signal
+import sys
 from collections.abc import AsyncGenerator, Awaitable, Callable
 from dataclasses import dataclass
 from typing import TypeVar
+from typing import Any, TypeVar
 
 from mavsdk.asyncio import ComponentType, Configuration, Mavsdk, System
 from mavsdk.asyncio.plugins.action import ActionAsync
@@ -38,7 +42,7 @@ class Drone:
 
 async def flight_instructions(drone: Drone) -> None:
     # START HERE: write your flight instructions in order below.
-    # Distances are metres NORTH and EAST of home. Height is metres above home.
+    # Distances are meters NORTH and EAST of home. Height is meters above home.
     # 'await' waits for a step to finish before moving to the next instruction.
 
     await takeoff(drone, height=50)
@@ -53,6 +57,34 @@ async def flight_instructions(drone: Drone) -> None:
     # Approach and land at home (north=0, east=0) facing North (runway heading 0 deg).
     # (To loiter indefinitely instead of landing, use: await loiter(drone))
     await land_at(drone, north=0, east=0, runway_heading_deg=0)
+
+
+async def run_mission(drone: Drone, config: Any = None) -> None:
+    """Execute the autonomous mission loop using MissionRunner."""
+    from mission import MissionConfig, MissionRunner, create_default_mission
+
+    # Resolve the mission configuration from the provided argument:
+    if config is None:
+        # Fall back to the default in-memory mission profile.
+        cfg = create_default_mission()
+    elif isinstance(config, (str, Path)):
+        # Load and validate mission parameters from a JSON file path (e.g. missions/flight_line_1.json).
+        cfg = MissionConfig.from_json_file(config)
+    elif isinstance(config, MissionConfig):
+        # Use an already-constructed MissionConfig object directly.
+        cfg = config
+    else:
+        raise TypeError(f"Unsupported config type: {type(config)}")
+
+    runner = MissionRunner(
+        drone=drone,
+        config=cfg,
+        takeoff_fn=takeoff,
+        fly_to_fn=fly_to,
+        land_at_fn=land_at,
+        loiter_fn=loiter,
+    )
+    await runner.run()
 
 
 # Helper functions: you should not need to edit these for your first flight.
@@ -101,7 +133,7 @@ async def check_aircraft(drone: Drone) -> None:
 async def takeoff(drone: Drone, height: float) -> None:
     """Use the configured fixed-wing launch procedure, then wait for climbout."""
     if not math.isfinite(height) or not 30 <= height <= 150:
-        raise ValueError("Use a takeoff height between 30 and 150 metres")
+        raise ValueError("Use a takeoff height between 30 and 150 meters")
 
     armed = await wait_for(drone.telemetry.subscribe_armed(), lambda value: True, timeout=10)
     in_air = await wait_for(drone.telemetry.subscribe_in_air(), lambda value: True, timeout=10)
@@ -151,9 +183,9 @@ async def land_at(drone: Drone, north: float = 0, east: float = 0, runway_headin
         raise ValueError("Does not support flights near the poles")
 
     # Convert coordinates to meters
-    metres_per_degree = math.pi * 6_371_000 / 180
-    touchdown_lat = home.latitude_deg + north / metres_per_degree
-    touchdown_lon = (home.longitude_deg + east / (metres_per_degree * cosine) + 180) % 360 - 180
+    meters_per_degree = math.pi * 6_371_000 / 180
+    touchdown_lat = home.latitude_deg + north / meters_per_degree
+    touchdown_lon = (home.longitude_deg + east / (meters_per_degree * cosine) + 180) % 360 - 180
 
     # Calculate approach waypoint:
     # A standard fixed-wing landing glideslope must be <= FW_LND_ANG (typically 5-8 deg).
@@ -166,8 +198,8 @@ async def land_at(drone: Drone, north: float = 0, east: float = 0, runway_headin
     approach_east = east - approach_distance * math.sin(rad)
 
     # Convert approach back into latitude and longitude
-    approach_lat = home.latitude_deg + approach_north / metres_per_degree
-    approach_lon = (home.longitude_deg + approach_east / (metres_per_degree * cosine) + 180) % 360 - 180
+    approach_lat = home.latitude_deg + approach_north / meters_per_degree
+    approach_lon = (home.longitude_deg + approach_east / (meters_per_degree * cosine) + 180) % 360 - 180
 
     # Disable terrain estimation and missing-terrain aborts so aircraft without
     # a lidar / rangefinder (such as the SITL model) can land cleanly.
@@ -257,7 +289,7 @@ async def land(drone: Drone) -> None:
 
 
 async def fly_to(drone: Drone, north: float, east: float, height: float) -> None:
-    """Fly near a point given in metres north/east of home at the given height."""
+    """Fly near a point given in meters north/east of home at the given height."""
     if not all(math.isfinite(value) for value in (north, east, height)):
         raise ValueError("Distances and height must be finite numbers")
     if math.hypot(north, east) > 2000 or not 30 <= height <= 150:
@@ -268,10 +300,10 @@ async def fly_to(drone: Drone, north: float, east: float, height: float) -> None
     if abs(cosine) < 0.01:
         raise ValueError("This example does not support flights near the poles")
 
-    # Convert the student's metre offsets into the GPS coordinates PX4 expects.
-    metres_per_degree = math.pi * 6_371_000 / 180
-    latitude = home.latitude_deg + north / metres_per_degree
-    longitude = (home.longitude_deg + east / (metres_per_degree * cosine) + 180) % 360 - 180
+    # Convert the student's meter offsets into the GPS coordinates PX4 expects.
+    meters_per_degree = math.pi * 6_371_000 / 180
+    latitude = home.latitude_deg + north / meters_per_degree
+    longitude = (home.longitude_deg + east / (meters_per_degree * cosine) + 180) % 360 - 180
     altitude = home.absolute_altitude_m + height  # MAVSDK needs altitude above sea level.
 
     # A plane starts turning before reaching a point. Allow its configured loiter
@@ -285,8 +317,8 @@ async def fly_to(drone: Drone, north: float, east: float, height: float) -> None
     def arrived(position: Position) -> bool:
         delta_lon = (position.longitude_deg - longitude + 180) % 360 - 180
         distance = math.hypot(
-            (position.latitude_deg - latitude) * metres_per_degree,
-            delta_lon * metres_per_degree * cosine,
+            (position.latitude_deg - latitude) * meters_per_degree,
+            delta_lon * meters_per_degree * cosine,
         )
         return distance <= arrival_radius and abs(position.absolute_altitude_m - altitude) <= 10
 
@@ -301,6 +333,16 @@ async def loiter(drone: Drone) -> None:
 
 
 async def main() -> None:
+    parser = argparse.ArgumentParser(description="SUAS drone control and autonomous mission loop runner.")
+    parser.add_argument(
+        "--mission",
+        nargs="?",
+        const="missions/default_mission.json",
+        default=None,
+        help="Path to JSON mission configuration to run the autonomous mission loop.",
+    )
+    args, _ = parser.parse_known_args()
+
     config = Configuration.create_with_component_type(ComponentType.GROUND_STATION)
     drone: Drone | None = None
     verified = False
@@ -341,6 +383,11 @@ async def main() -> None:
                 print(f"Note: Foxglove 3D telemetry stream not started: {stream_err}")
 
             await flight_instructions(drone)
+            if args.mission is not None:
+                print(f"Starting autonomous mission loop using: {args.mission}")
+                await run_mission(drone, args.mission)
+            else:
+                await flight_instructions(drone)
 
             # If the flight finished with landing, the aircraft is on the ground.
             # If it finished with loiter(), keep the connection open until Ctrl-C.

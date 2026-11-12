@@ -57,7 +57,7 @@ class StarterFlight(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(set(corners)), 4)
         self.assertTrue(all(point[2] == 50 for point in corners))
 
-    async def test_goto_converts_metres_and_height_to_gps_and_amsl(self):
+    async def test_goto_converts_meters_and_height_to_gps_and_amsl(self):
         longitude = 8 + 500 / (math.pi * 6371000 / 180 * math.cos(math.radians(47)))
         self.drone.telemetry.subscribe_position = lambda: stream(
             State(latitude_deg=47, longitude_deg=8, absolute_altitude_m=550),

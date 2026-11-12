@@ -1,0 +1,82 @@
+{
+  "name": "default_mission",
+  "takeoff_height": 50.0,
+  "target_laps": 1,
+  "min_battery_pct": 20.0,
+  "lap_waypoints": [
+    {
+      "north": 0,
+      "east": 500,
+      "height": 50
+    },
+    {
+      "north": 500,
+      "east": 500,
+      "height": 50
+    },
+    {
+      "north": 500,
+      "east": 0,
+      "height": 50
+    },
+    {
+      "north": 0,
+      "east": 0,
+      "height": 50
+    }
+  ],
+  "survey_waypoints": [
+    {
+      "north": 720,
+      "east": 220,
+      "height": 50
+    },
+    {
+      "north": 880,
+      "east": 220,
+      "height": 50
+    },
+    {
+      "north": 880,
+      "east": 270,
+      "height": 50
+    },
+    {
+      "north": 720,
+      "east": 270,
+      "height": 50
+    },
+    {
+      "north": 720,
+      "east": 320,
+      "height": 50
+    },
+    {
+      "north": 880,
+      "east": 320,
+      "height": 50
+    }
+  ],
+  "delivery_waypoints": [
+    {
+      "north": 750,
+      "east": 250,
+      "height": 45.7
+    },
+    {
+      "north": 850,
+      "east": 350,
+      "height": 45.7
+    }
+  ],
+  "search_boundary": {
+    "min_north": 700.0,
+    "max_north": 900.0,
+    "min_east": 200.0,
+    "max_east": 400.0,
+    "buffer_m": 25.0
+  },
+  "landing_north": 0.0,
+  "landing_east": 0.0,
+  "landing_runway_heading_deg": 0.0
+}
