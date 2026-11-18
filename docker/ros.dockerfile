@@ -1,7 +1,7 @@
 # ROS 2 Jazzy on Ubuntu 24.04
 FROM ros:jazzy-ros-base
 
-# PX4_MSGS_BRANCH must match PX4_VERSION in sitl.sh, or topics may not match.
+# PX4_MSGS_BRANCH must match PX4_VERSION in Makefile, or topics may not match.
 ARG PX4_MSGS_BRANCH=release/1.17
 
 # Basic dependencies

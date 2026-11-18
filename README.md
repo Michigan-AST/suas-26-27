@@ -25,14 +25,14 @@ Open the **QGroundControl** application on your computer. Just leave it running 
 From the repository root, start PX4 and the Gazebo simulation:
 
 ```bash
-bash sitl.sh
+make sitl
 ```
 
 To speed up the simulation (e.g. 2x real-time speed):
 
 ```bash
-bash sitl.sh --speed 2
-# or: PX4_SIM_SPEED_FACTOR=2 bash sitl.sh
+make sitl SPEED=2
+# or: PX4_SIM_SPEED_FACTOR=2 make sitl
 ```
 
 This builds the `suas-px4-sitl:v1.17.0` image (if not already built) and launches PX4 with the fixed-wing RC Cessna model (`gz_rc_cessna`) in headless mode.
@@ -120,7 +120,7 @@ If you see `failed to receive status ... error reading from server: EOF` during 
 1. Confirm Docker Desktop is running and has sufficient disk space/memory allocated.
 2. Rebuild directly with detailed output:
    ```bash
-   docker build --progress=plain -f docker/sitl.dockerfile -t suas-px4-sitl:v1.17.0 .
+   docker build --progress=plain -f docker/px4.dockerfile -t suas-px4-sitl:v1.17.0 .
    ```
 3. Inspect the image configuration:
    ```bash

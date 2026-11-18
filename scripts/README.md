@@ -22,7 +22,7 @@ Run these from the repository root. Enable Docker Desktop's **Settings >
 Resources > Network > Enable host networking**, then start the fixed-wing model:
 
 ```bash
-bash sitl.sh make px4_sitl gz_rc_cessna
+make sitl SITL_ARGS="make px4_sitl gz_rc_cessna"
 ```
 
 In another terminal (Python 3.9+ on macOS/Linux):
