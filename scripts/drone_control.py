@@ -59,6 +59,35 @@ async def flight_instructions(drone: Drone) -> None:
     await land_at(drone, north=0, east=0, runway_heading_deg=0)
 
 
+def resolve_mission_path(mission_spec: str | Path | None) -> Path:
+    """Resolve shorthand mission alias or file path to an existing JSON mission config."""
+    if not mission_spec or str(mission_spec).lower() in ("default", "default_mission"):
+        return Path(__file__).resolve().parents[1] / "missions" / "default_mission.json"
+
+    spec_str = str(mission_spec)
+    spec_path = Path(spec_str)
+    if spec_path.is_file():
+        return spec_path
+
+    # Check in missions/ folder with or without .json
+    missions_dir = Path(__file__).resolve().parents[1] / "missions"
+    candidate = missions_dir / f"{spec_str}.json" if not spec_str.endswith(".json") else missions_dir / spec_str
+    if candidate.is_file():
+        return candidate
+
+    # Check shorthand aliases
+    if spec_str in ("1", "fl1"):
+        candidate = missions_dir / "flight_line_1.json"
+        if candidate.is_file():
+            return candidate
+    elif spec_str in ("2", "fl2"):
+        candidate = missions_dir / "flight_line_2.json"
+        if candidate.is_file():
+            return candidate
+
+    raise FileNotFoundError(f"Could not resolve mission specification '{mission_spec}' to a valid file.")
+
+
 async def run_mission(drone: Drone, config: Any = None) -> None:
     """Execute the autonomous mission loop using MissionRunner."""
     from mission import MissionConfig, MissionRunner, create_default_mission
@@ -68,8 +97,9 @@ async def run_mission(drone: Drone, config: Any = None) -> None:
         # Fall back to the default in-memory mission profile.
         cfg = create_default_mission()
     elif isinstance(config, (str, Path)):
-        # Load and validate mission parameters from a JSON file path (e.g. missions/flight_line_1.json).
-        cfg = MissionConfig.from_json_file(config)
+        # Load and validate mission parameters from resolved JSON file path.
+        resolved_path = resolve_mission_path(config)
+        cfg = MissionConfig.from_json_file(resolved_path)
     elif isinstance(config, MissionConfig):
         # Use an already-constructed MissionConfig object directly.
         cfg = config
@@ -345,9 +375,14 @@ async def main() -> None:
     parser.add_argument(
         "--mission",
         nargs="?",
-        const="missions/default_mission.json",
-        default=None,
-        help="Path to JSON mission configuration to run the autonomous mission loop.",
+        const="default",
+        default="default",
+        help="Mission name (e.g. 'default', 'loop', 'flight_line_1') or JSON filepath. Defaults to 'default'.",
+    )
+    parser.add_argument(
+        "--legacy-instructions",
+        action="store_true",
+        help="Run simple starter flight_instructions directly instead of the autonomous mission loop.",
     )
     args, _ = parser.parse_known_args()
 
@@ -390,21 +425,22 @@ async def main() -> None:
             except Exception as stream_err:
                 print(f"Note: Foxglove 3D telemetry stream not started: {stream_err}")
 
-            await flight_instructions(drone)
-            if args.mission is not None:
-                print(f"Starting autonomous mission loop using: {args.mission}")
-                await run_mission(drone, args.mission)
-            else:
+            if args.legacy_instructions:
+                print("Running legacy starter flight instructions...")
                 await flight_instructions(drone)
+            else:
+                mission_path = resolve_mission_path(args.mission)
+                print(f"Starting autonomous mission loop using: {mission_path.name}")
+                await run_mission(drone, mission_path)
 
             # If the flight finished with landing, the aircraft is on the ground.
             # If it finished with loiter(), keep the connection open until Ctrl-C.
             in_air = await wait_for(drone.telemetry.subscribe_in_air(), lambda value: True, timeout=5)
             if in_air:
-                print("Flight instructions finished; plane is in the air. Ctrl-C disconnects.")
+                print("Flight routine finished; plane is in the air. Ctrl-C disconnects.")
                 await asyncio.Event().wait()
             else:
-                print("Flight instructions and landing complete.")
+                print("Flight routine and landing complete.")
 
         except asyncio.CancelledError:
             print("\nStopping the script...")

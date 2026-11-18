@@ -1,0 +1,39 @@
+{
+  "name": "simple_loop",
+  "takeoff_height": 50.0,
+  "target_laps": 1,
+  "min_battery_pct": 20.0,
+  "lap_waypoints": [
+    {
+      "north": 0.0,
+      "east": 500.0,
+      "height": 50.0
+    },
+    {
+      "north": 500.0,
+      "east": 500.0,
+      "height": 50.0
+    },
+    {
+      "north": 500.0,
+      "east": 0.0,
+      "height": 50.0
+    },
+    {
+      "north": 0.0,
+      "east": 0.0,
+      "height": 50.0
+    },
+    {
+      "north": 0.0,
+      "east": 500.0,
+      "height": 50.0
+    }
+  ],
+  "survey_waypoints": [],
+  "delivery_waypoints": [],
+  "search_boundary": null,
+  "landing_north": 0.0,
+  "landing_east": 0.0,
+  "landing_runway_heading_deg": 0.0
+}

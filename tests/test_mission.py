@@ -268,7 +268,7 @@ class TestMissionLoop(unittest.IsolatedAsyncioTestCase):
                 tmp_file.unlink()
 
     def test_saved_flight_lines_load_and_validate(self) -> None:
-        """MAST-L2-ASW-16: Verify flight_line_1.json and flight_line_2.json load cleanly."""
+        """MAST-L2-ASW-16: Verify flight_line_1.json, flight_line_2.json, and loop.json load cleanly."""
         for filename in ("default_mission.json", "flight_line_1.json", "flight_line_2.json"):
             path = Path(__file__).resolve().parents[1] / "missions" / filename
             self.assertTrue(path.exists(), f"{filename} does not exist")
@@ -276,6 +276,11 @@ class TestMissionLoop(unittest.IsolatedAsyncioTestCase):
             self.assertGreater(len(cfg.lap_waypoints), 0)
             self.assertGreater(len(cfg.survey_waypoints), 0)
             self.assertIsNotNone(cfg.search_boundary)
+
+        loop_path = Path(__file__).resolve().parents[1] / "missions" / "loop.json"
+        self.assertTrue(loop_path.exists())
+        loop_cfg = MissionConfig.from_json_file(loop_path)
+        self.assertEqual(len(loop_cfg.lap_waypoints), 5)
 
     def test_get_waypoints_for_phase(self) -> None:
         """Verify retrieving waypoints from config based on the mission phase."""

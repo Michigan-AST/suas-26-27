@@ -1,9 +1,5 @@
 # First flight: take off and fly a loop
 
-Edit **`flight_instructions()` at the top of `drone_control.py`**, under
-`# START HERE`. This is where your drone instructions go. The helper functions
-below handle the PX4 connection and telemetry.
-
 The sample takes off to 50 m, flies one 500 m square loop, and lands at
 home. Coordinates are **meters north/east of home**, and height is **meters
 above home**, not height above the terrain. `await` waits for each step's
@@ -20,7 +16,7 @@ await fly_to(drone, north=0, east=500, height=50)
 await land_at(drone, north=0, east=0, runway_heading_deg=0)
 ```
 
-## Run it in the simulator
+## Running missions in the simulator
 
 Run these from the repository root. Enable Docker Desktop's **Settings >
 Resources > Network > Enable host networking**, then start the fixed-wing model:
@@ -35,6 +31,31 @@ In another terminal (Python 3.9+ on macOS/Linux):
 make venv
 make run
 ```
+
+`make run` starts the full autonomous mission (`missions/default_mission.json`) by default:
+Takeoff $\rightarrow$ Cruise $\rightarrow$ Waypoint Laps $\rightarrow$ Lawnmower Survey $\rightarrow$ Search $\rightarrow$ Delivery $\rightarrow$ Return $\rightarrow$ Landing.
+
+### Running specific missions or the simple loop
+
+- **Simple 500 m loop**:
+  ```bash
+  make run loop
+  # or
+  make run MISSION=loop
+  # or via Python directly:
+  ./.venv/bin/python scripts/drone_control.py --mission loop
+  ```
+
+- **Competition Flight Lines**:
+  ```bash
+  make run flight_line_1
+  make run flight_line_2
+  ```
+
+- **Custom JSON file**:
+  ```bash
+  make run MISSION=path/to/custom_mission.json
+  ```
 
 `make venv` creates `.venv` and installs the exact package versions in
 `requirements.txt`. No activation is needed: the Makefile uses `.venv/bin/python`

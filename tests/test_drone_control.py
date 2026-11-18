@@ -152,6 +152,33 @@ class StarterFlight(unittest.IsolatedAsyncioTestCase):
                 await flight.land_at(self.drone, north, east, heading)
         self.drone.mission_raw.upload_mission.assert_not_called()
 
+    def test_resolve_mission_path_aliases(self):
+        missions_dir = Path(__file__).resolve().parents[1] / "missions"
+
+        self.assertEqual(flight.resolve_mission_path(None), missions_dir / "default_mission.json")
+        self.assertEqual(flight.resolve_mission_path("default"), missions_dir / "default_mission.json")
+        self.assertEqual(flight.resolve_mission_path("loop"), missions_dir / "loop.json")
+        self.assertEqual(flight.resolve_mission_path("flight_line_1"), missions_dir / "flight_line_1.json")
+        self.assertEqual(flight.resolve_mission_path("flight_line_2"), missions_dir / "flight_line_2.json")
+        self.assertEqual(flight.resolve_mission_path("1"), missions_dir / "flight_line_1.json")
+        self.assertEqual(flight.resolve_mission_path("2"), missions_dir / "flight_line_2.json")
+        self.assertEqual(flight.resolve_mission_path(missions_dir / "loop.json"), missions_dir / "loop.json")
+
+        with self.assertRaises(FileNotFoundError):
+            flight.resolve_mission_path("non_existent_mission_12345")
+
+    async def test_run_mission_resolves_and_executes_loop(self):
+        with patch.object(flight, "takeoff", AsyncMock()) as mock_takeoff, \
+             patch.object(flight, "fly_to", AsyncMock()) as mock_fly_to, \
+             patch.object(flight, "land_at", AsyncMock()) as mock_land_at, \
+             patch.object(flight, "loiter", AsyncMock()):
+            await flight.run_mission(self.drone, "loop")
+
+        mock_takeoff.assert_awaited_once()
+        mock_land_at.assert_awaited_once()
+        # loop.json has 5 lap waypoints + 1 return waypoint to base
+        self.assertEqual(mock_fly_to.await_count, 6)
+
 
 if __name__ == '__main__':
     unittest.main()
