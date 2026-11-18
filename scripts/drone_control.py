@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-"""Student starter code: take off, fly a square loop, and loiter in PX4 SITL."""
-
 from __future__ import annotations
 
 # .venv/bin/python scripts/drone_control.py
