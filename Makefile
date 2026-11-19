@@ -1,3 +1,5 @@
+# you should probably run this with nohup
+
 # Use a different interpreter with: make venv PYTHON=python3.11
 PYTHON ?= python3
 VENV := .venv
@@ -10,6 +12,9 @@ PX4_SRC := $(CURDIR)/src/PX4-Autopilot
 REBUILD ?= 0
 SPEED ?= $(PX4_SIM_SPEED_FACTOR)
 SITL_ARGS ?=
+
+# Built-in PX4 world name, or a custom ./worlds/<WORLD>.sdf (without .sdf)
+WORLD ?= moving_platform
 
 MISSION ?= default
 
@@ -60,16 +65,20 @@ sitl:
 		echo "Docker image $(SITL_IMAGE) already exists. Skipping build (pass REBUILD=1 to force)."; \
 	fi; \
 	if [ -t 0 ] && [ -t 1 ]; then TTY_FLAG="-it"; else TTY_FLAG="-i"; fi; \
-	docker run $$TTY_FLAG --rm \
+	set -- \
 		--env=LOCAL_USER_ID="$$(id -u)" \
 		--env=PX4_SIM_SPEED_FACTOR="$(SPEED)" \
+		--env=PX4_GZ_WORLD="$(WORLD)" \
 		--volume="$(CURDIR):$(CURDIR):rw" \
 		--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw \
 		--env=DISPLAY="$${DISPLAY:-:0}" \
 		--network host \
 		--workdir="$(PX4_SRC)" \
-		--name=suas-px4-sitl \
-		"$(SITL_IMAGE)" $(SITL_ARGS)
+		--name=suas-px4-sitl; \
+	if [ -f "$(CURDIR)/worlds/$(WORLD).sdf" ]; then \
+		set -- "$$@" --volume="$(CURDIR)/worlds/$(WORLD).sdf:$(PX4_SRC)/Tools/simulation/gz/worlds/$(WORLD).sdf:ro"; \
+	fi; \
+	docker run $$TTY_FLAG --rm "$$@" "$(SITL_IMAGE)" $(SITL_ARGS)
 
 # The simulator must already be running. This starts the autonomous mission loop.
 run: venv
@@ -89,7 +98,7 @@ clean:
 
 help:
 	@echo "make venv      Create .venv and install pinned dependencies (default)."
-	@echo "make sitl      Start PX4 + Gazebo SITL container (SPEED=2, REBUILD=1)."
+	@echo "make sitl      Start PX4 + Gazebo SITL container (WORLD=default, SPEED=2, REBUILD=1)."
 	@echo "make run       Run autonomous mission loop (or 'make run loop', 'make run MISSION=flight_line_1')."
 	@echo "make foxglove  Stream live telemetry to Foxglove Studio (3D viewer)."
 	@echo "make test      Run Python tests."
