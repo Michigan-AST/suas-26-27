@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.9">
+  <model name="rc_cessna_cam_down">
+    <include merge="true">
+      <uri>model://rc_cessna</uri>
+    </include>
+
+    <!-- Fixed nadir camera mount (MAST-L2-PER-02): +X camera points -Z body (down),
+         image-up (+Z cam) points +X body (nose), image-right (-Y cam) points -Y body (right wing).
+         FOV = 2 * atan(4056 * 1.55e-6 / (2 * 6e-3)) = 0.967 rad (55.4 deg), matching SUB-PER 6 mm lens. -->
+    <link name="nadir_camera_link">
+      <pose relative_to="base_link">0.0 0.0 -0.10 0 1.57079632679 0</pose>
+      <inertial>
+        <mass>0.01</mass>
+        <inertia>
+          <ixx>1e-5</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-5</iyy>
+          <iyz>0</iyz>
+          <izz>1e-5</izz>
+        </inertia>
+      </inertial>
+      <visual name="camera_housing">
+        <geometry>
+          <box>
+            <size>0.04 0.05 0.05</size>
+          </box>
+        </geometry>
+        <material>
+          <ambient>0.1 0.1 0.1 1</ambient>
+          <diffuse>0.1 0.1 0.1 1</diffuse>
+        </material>
+      </visual>
+      <sensor name="nadir_imager" type="camera">
+        <gz_frame_id>nadir_camera_link</gz_frame_id>
+        <pose>0 0 0 0 0 0</pose>
+        <camera>
+          <horizontal_fov>0.967</horizontal_fov>
+          <image>
+            <width>1280</width>
+            <height>960</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>0.2</near>
+            <far>2000</far>
+          </clip>
+        </camera>
+        <always_on>1</always_on>
+        <update_rate>2</update_rate>
+        <topic>/camera</topic>
+        <visualize>false</visualize>
+      </sensor>
+    </link>
+
+    <joint name="nadir_camera_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>nadir_camera_link</child>
+    </joint>
+  </model>
+</sdf>

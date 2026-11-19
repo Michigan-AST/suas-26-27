@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Auto-generated from worlds/suas_site/scene.json by worlds/suas_site/build_site.py -->
+<sdf version="1.9">
+  <world name="suas_site">
+    <physics type="ode">
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
+    </physics>
+    <gravity>0 0 -9.8</gravity>
+    <magnetic_field>6e-06 2.3e-05 -4.2e-05</magnetic_field>
+    <atmosphere type="adiabatic"/>
+    <scene>
+      <grid>false</grid>
+      <ambient>0.48 0.48 0.48 1</ambient>
+      <background>0.68 0.78 0.90 1</background>
+      <shadows>true</shadows>
+    </scene>
+
+    <light name="sunUTC" type="directional">
+      <pose>0 0 500 0 0 0</pose>
+      <cast_shadows>true</cast_shadows>
+      <intensity>1.1</intensity>
+      <direction>-0.35 0.45 -0.82</direction>
+      <diffuse>0.95 0.94 0.90 1</diffuse>
+      <specular>0.25 0.25 0.25 1</specular>
+      <attenuation>
+        <range>3000</range>
+        <linear>0</linear>
+        <constant>1</constant>
+        <quadratic>0</quadratic>
+      </attenuation>
+    </light>
+
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <world_frame_orientation>ENU</world_frame_orientation>
+      <latitude_deg>47.397971057728974</latitude_deg>
+      <longitude_deg>8.546163739800146</longitude_deg>
+      <elevation>0.0</elevation>
+    </spherical_coordinates>
+
+    <!-- Infinite collision ground plane + runway visual at origin -->
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry><plane><normal>0 0 1</normal><size>4000 4000</size></plane></geometry>
+          <surface><friction><ode/></friction></surface>
+        </collision>
+        <visual name="base_grass">
+          <geometry><plane><normal>0 0 1</normal><size>3000 3000</size></plane></geometry>
+          <material>
+            <ambient>0.42 0.38 0.28 1</ambient>
+            <diffuse>0.52 0.46 0.34 1</diffuse>
+          </material>
+        </visual>
+        <visual name="runway">
+          <pose>0 0 0.01 0 0 0</pose>
+          <geometry><box><size>14 160 0.02</size></box></geometry>
+          <material>
+            <ambient>0.24 0.24 0.26 1</ambient>
+            <diffuse>0.28 0.28 0.30 1</diffuse>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- High-texture Search Boundary ground patch for stitching & feature matching -->
+    <model name="survey_ground_patch">
+      <static>true</static>
+      <pose>300.000 800.000 0.02 0 0 0</pose>
+      <link name="link">
+        <visual name="textured_patch">
+          <geometry>
+            <box><size>320.000 320.000 0.02</size></box>
+          </geometry>
+          <material>
+            <ambient>0.85 0.85 0.85 1</ambient>
+            <diffuse>0.95 0.95 0.95 1</diffuse>
+            <specular>0.05 0.05 0.05 1</specular>
+            <pbr>
+              <metal>
+                <albedo_map>../../../worlds/suas_site/ground_texture.png</albedo_map>
+                <roughness>0.92</roughness>
+                <metalness>0.0</metalness>
+              </metal>
+            </pbr>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Aircraft with fixed downward 2 Hz nadir mapping camera (attached by PX4 via PX4_GZ_MODEL_NAME=rc_cessna_0) -->
+    <include>
+      <uri>model://rc_cessna_cam_down</uri>
+      <name>rc_cessna_0</name>
+      <pose>0 0 0.25 0 0 1.57079632679</pose>
+    </include>
+
+    <model name="tent_1">
+      <static>true</static>
+      <pose>265.000 760.000 0.000 0 0 1.308997</pose>
+      <link name="link">
+        <visual name="leg_0">
+          <pose>-1.420 -1.420 1.200 0 0 0</pose>
+          <geometry><cylinder><radius>0.035</radius><length>2.400</length></cylinder></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
+        </visual>
+        <visual name="leg_1">
+          <pose>1.420 -1.420 1.200 0 0 0</pose>
+          <geometry><cylinder><radius>0.035</radius><length>2.400</length></cylinder></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
+        </visual>
+        <visual name="leg_2">
+          <pose>1.420 1.420 1.200 0 0 0</pose>
+          <geometry><cylinder><radius>0.035</radius><length>2.400</length></cylinder></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
+        </visual>
+        <visual name="leg_3">
+          <pose>-1.420 1.420 1.200 0 0 0</pose>
+          <geometry><cylinder><radius>0.035</radius><length>2.400</length></cylinder></geometry>
+          <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.85 0.85 0.85 1</diffuse></material>
+        </visual>
+        <visual name="canopy">
+          <pose>0 0 2.400 0 0 0</pose>
+          <geometry><box><size>3.000 3.000 0.14</size></box></geometry>
+          <material>
+            <ambient>0.06 0.24 0.86 1</ambient>
+            <diffuse>0.08 0.30 0.92 1</diffuse>
+            <specular>0.15 0.15 0.2 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+    <model name="mannequin_1">
+      <static>true</static>
+      <pose>330.000 835.000 0.000 0 0 0.959931</pose>
+      <link name="link">
+        <visual name="torso">
+          <pose>0.18 0 0.14 0 0 0</pose>
+          <geometry><box><size>0.62 0.42 0.20</size></box></geometry>
+          <material><ambient>0.88 0.18 0.08 1</ambient><diffuse>0.94 0.22 0.10 1</diffuse></material>
+        </visual>
+        <visual name="head">
+          <pose>0.64 0 0.16 0 0 0</pose>
+          <geometry><sphere><radius>0.13</radius></sphere></geometry>
+          <material><ambient>0.85 0.68 0.56 1</ambient><diffuse>0.90 0.72 0.60 1</diffuse></material>
+        </visual>
+        <visual name="left_leg">
+          <pose>-0.48 0.11 0.11 0 0 0</pose>
+          <geometry><box><size>0.78 0.16 0.16</size></box></geometry>
+          <material><ambient>0.18 0.24 0.42 1</ambient><diffuse>0.22 0.28 0.48 1</diffuse></material>
+        </visual>
+        <visual name="right_leg">
+          <pose>-0.48 -0.11 0.11 0 0 0</pose>
+          <geometry><box><size>0.78 0.16 0.16</size></box></geometry>
+          <material><ambient>0.18 0.24 0.42 1</ambient><diffuse>0.22 0.28 0.48 1</diffuse></material>
+        </visual>
+        <visual name="arms">
+          <pose>0.22 0 0.12 0 0 0</pose>
+          <geometry><box><size>0.18 0.92 0.12</size></box></geometry>
+          <material><ambient>0.88 0.18 0.08 1</ambient><diffuse>0.94 0.22 0.10 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="tree_1">
+      <static>true</static>
+      <pose>230.000 725.000 0 0 0 0</pose>
+      <link name="link">
+        <visual name="trunk">
+          <pose>0 0 2.025 0 0 0</pose>
+          <geometry><cylinder><radius>0.30</radius><length>4.050</length></cylinder></geometry>
+          <material><ambient>0.32 0.20 0.10 1</ambient><diffuse>0.36 0.22 0.12 1</diffuse></material>
+        </visual>
+        <visual name="canopy">
+          <pose>0 0 6.325 0 0 0</pose>
+          <geometry><sphere><radius>3.500</radius></sphere></geometry>
+          <material><ambient>0.14 0.32 0.12 1</ambient><diffuse>0.18 0.38 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="tree_2">
+      <static>true</static>
+      <pose>240.000 870.000 0 0 0 0</pose>
+      <link name="link">
+        <visual name="trunk">
+          <pose>0 0 2.250 0 0 0</pose>
+          <geometry><cylinder><radius>0.30</radius><length>4.500</length></cylinder></geometry>
+          <material><ambient>0.32 0.20 0.10 1</ambient><diffuse>0.36 0.22 0.12 1</diffuse></material>
+        </visual>
+        <visual name="canopy">
+          <pose>0 0 7.100 0 0 0</pose>
+          <geometry><sphere><radius>4.000</radius></sphere></geometry>
+          <material><ambient>0.14 0.32 0.12 1</ambient><diffuse>0.18 0.38 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="tree_3">
+      <static>true</static>
+      <pose>342.000 848.000 0 0 0 0</pose>
+      <link name="link">
+        <visual name="trunk">
+          <pose>0 0 1.688 0 0 0</pose>
+          <geometry><cylinder><radius>0.30</radius><length>3.375</length></cylinder></geometry>
+          <material><ambient>0.32 0.20 0.10 1</ambient><diffuse>0.36 0.22 0.12 1</diffuse></material>
+        </visual>
+        <visual name="canopy">
+          <pose>0 0 5.325 0 0 0</pose>
+          <geometry><sphere><radius>3.000</radius></sphere></geometry>
+          <material><ambient>0.14 0.32 0.12 1</ambient><diffuse>0.18 0.38 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="tree_4">
+      <static>true</static>
+      <pose>365.000 730.000 0 0 0 0</pose>
+      <link name="link">
+        <visual name="trunk">
+          <pose>0 0 1.913 0 0 0</pose>
+          <geometry><cylinder><radius>0.30</radius><length>3.825</length></cylinder></geometry>
+          <material><ambient>0.32 0.20 0.10 1</ambient><diffuse>0.36 0.22 0.12 1</diffuse></material>
+        </visual>
+        <visual name="canopy">
+          <pose>0 0 6.295 0 0 0</pose>
+          <geometry><sphere><radius>3.800</radius></sphere></geometry>
+          <material><ambient>0.14 0.32 0.12 1</ambient><diffuse>0.18 0.38 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="tree_5">
+      <static>true</static>
+      <pose>370.000 880.000 0 0 0 0</pose>
+      <link name="link">
+        <visual name="trunk">
+          <pose>0 0 1.800 0 0 0</pose>
+          <geometry><cylinder><radius>0.30</radius><length>3.600</length></cylinder></geometry>
+          <material><ambient>0.32 0.20 0.10 1</ambient><diffuse>0.36 0.22 0.12 1</diffuse></material>
+        </visual>
+        <visual name="canopy">
+          <pose>0 0 5.680 0 0 0</pose>
+          <geometry><sphere><radius>3.200</radius></sphere></geometry>
+          <material><ambient>0.14 0.32 0.12 1</ambient><diffuse>0.18 0.38 0.15 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="truck_1">
+      <static>true</static>
+      <pose>295.000 805.000 0.900 0 0 1.221730</pose>
+      <link name="link">
+        <visual name="box">
+          <geometry><box><size>5.000 2.100 1.800</size></box></geometry>
+          <material><ambient>0.52 0.54 0.56 1</ambient><diffuse>0.52 0.54 0.56 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="pallet_1">
+      <static>true</static>
+      <pose>310.000 785.000 0.100 0 0 1.396263</pose>
+      <link name="link">
+        <visual name="box">
+          <geometry><box><size>1.400 1.200 0.200</size></box></geometry>
+          <material><ambient>0.55 0.48 0.36 1</ambient><diffuse>0.55 0.48 0.36 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="crate_1">
+      <static>true</static>
+      <pose>250.000 815.000 0.300 0 0 0.610865</pose>
+      <link name="link">
+        <visual name="box">
+          <geometry><box><size>1.200 0.900 0.600</size></box></geometry>
+          <material><ambient>0.55 0.48 0.36 1</ambient><diffuse>0.55 0.48 0.36 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="tarp_grey">
+      <static>true</static>
+      <pose>325.000 745.000 0.030 0 0 0.349066</pose>
+      <link name="link">
+        <visual name="box">
+          <geometry><box><size>2.600 2.000 0.060</size></box></geometry>
+          <material><ambient>0.55 0.48 0.36 1</ambient><diffuse>0.55 0.48 0.36 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>

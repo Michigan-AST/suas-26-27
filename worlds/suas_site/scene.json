@@ -1,0 +1,128 @@
+{
+  "name": "suas_site",
+  "origin": {
+    "latitude_deg": 47.397971057728974,
+    "longitude_deg": 8.546163739800146,
+    "elevation_m": 0.0
+  },
+  "search_boundary": {
+    "min_north": 700.0,
+    "max_north": 900.0,
+    "min_east": 200.0,
+    "max_east": 400.0,
+    "buffer_m": 15.0
+  },
+  "ground_patch": {
+    "center_north": 800.0,
+    "center_east": 300.0,
+    "size_north_m": 320.0,
+    "size_east_m": 320.0,
+    "texture_file": "ground_texture.png"
+  },
+  "targets": [
+    {
+      "id": "tent_1",
+      "label": "tent",
+      "north_m": 760.0,
+      "east_m": 265.0,
+      "elevation_m": 0.0,
+      "width_m": 3.0,
+      "length_m": 3.0,
+      "height_m": 2.4,
+      "yaw_deg": 15.0
+    },
+    {
+      "id": "mannequin_1",
+      "label": "mannequin",
+      "north_m": 835.0,
+      "east_m": 330.0,
+      "elevation_m": 0.0,
+      "width_m": 0.55,
+      "length_m": 1.8,
+      "height_m": 0.25,
+      "yaw_deg": 35.0
+    }
+  ],
+  "objects": [
+    {
+      "id": "tree_1",
+      "kind": "tree",
+      "north_m": 725.0,
+      "east_m": 230.0,
+      "radius_m": 3.5,
+      "height_m": 9.0
+    },
+    {
+      "id": "tree_2",
+      "kind": "tree",
+      "north_m": 870.0,
+      "east_m": 240.0,
+      "radius_m": 4.0,
+      "height_m": 10.0
+    },
+    {
+      "id": "tree_3",
+      "kind": "tree",
+      "north_m": 848.0,
+      "east_m": 342.0,
+      "radius_m": 3.0,
+      "height_m": 7.5
+    },
+    {
+      "id": "tree_4",
+      "kind": "tree",
+      "north_m": 730.0,
+      "east_m": 365.0,
+      "radius_m": 3.8,
+      "height_m": 8.5
+    },
+    {
+      "id": "tree_5",
+      "kind": "tree",
+      "north_m": 880.0,
+      "east_m": 370.0,
+      "radius_m": 3.2,
+      "height_m": 8.0
+    },
+    {
+      "id": "truck_1",
+      "kind": "vehicle",
+      "north_m": 805.0,
+      "east_m": 295.0,
+      "length_m": 5.0,
+      "width_m": 2.1,
+      "height_m": 1.8,
+      "yaw_deg": 20.0
+    },
+    {
+      "id": "pallet_1",
+      "kind": "debris",
+      "north_m": 785.0,
+      "east_m": 310.0,
+      "length_m": 1.4,
+      "width_m": 1.2,
+      "height_m": 0.2,
+      "yaw_deg": 10.0
+    },
+    {
+      "id": "crate_1",
+      "kind": "debris",
+      "north_m": 815.0,
+      "east_m": 250.0,
+      "length_m": 1.2,
+      "width_m": 0.9,
+      "height_m": 0.6,
+      "yaw_deg": 55.0
+    },
+    {
+      "id": "tarp_grey",
+      "kind": "debris",
+      "north_m": 745.0,
+      "east_m": 325.0,
+      "length_m": 2.6,
+      "width_m": 2.0,
+      "height_m": 0.06,
+      "yaw_deg": 70.0
+    }
+  ]
+}
