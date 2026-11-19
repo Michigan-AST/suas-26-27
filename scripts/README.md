@@ -32,8 +32,10 @@ make venv
 make run
 ```
 
-`make run` starts the full autonomous mission (`missions/default_mission.json`) by default:
-Takeoff $\rightarrow$ Cruise $\rightarrow$ Waypoint Laps $\rightarrow$ Lawnmower Survey $\rightarrow$ Search $\rightarrow$ Delivery $\rightarrow$ Return $\rightarrow$ Landing.
+`make run` starts the full mapping mission (`missions/mapping_sitl.json`) by default:
+Takeoff → Cruise → Waypoint Laps → Lawnmower Survey (camera capture) → **auto-spawn mapper** → Search (raw-frame detect) → Delivery → Return → Landing.
+
+The orthomosaic is built in a background process after SURVEY; you do not need `make map` during flight. Use `make map` / `make eval` only to redo or score a capture offline (see root [`README.md`](../README.md)).
 
 ### Running specific missions or the simple loop
 
