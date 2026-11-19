@@ -4,24 +4,36 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import math
+from pathlib import Path
 import time
 from dataclasses import dataclass
 from typing import Any, Optional
 
+import cv2
 import foxglove
 from foxglove.schemas import (
+    CameraCalibration,
     Color,
+    CompressedImage,
     CubePrimitive,
+    CylinderPrimitive,
     FrameTransform,
+    LinePrimitive,
+    LinePrimitiveLineType,
     LocationFix,
+    Point3,
     Pose,
     Quaternion,
     SceneEntity,
     SceneUpdate,
+    SpherePrimitive,
     Timestamp,
+    TriangleListPrimitive,
     Vector3,
 )
+import numpy as np
 
 
 @dataclass
@@ -141,13 +153,489 @@ def build_airplane_entity(ts: Optional[Timestamp] = None) -> SceneUpdate:
     return SceneUpdate(entities=[entity])
 
 
-async def run_foxglove_telemetry_loop(drone: Any, port: int = 8765) -> None:
+def build_site_scene_update(
+    scene_path: str | Path = "worlds/suas_site/scene.json",
+    dem_path: Optional[str | Path] = "worlds/suas_site/dem.npz",
+    ts: Optional[Timestamp] = None,
+) -> Optional[SceneUpdate]:
+    """Build Foxglove /scene entities for terrain, Search Boundary, trees, and ground-truth targets."""
+    sp = Path(scene_path)
+    if not sp.is_file():
+        return None
+    scene = json.loads(sp.read_text(encoding="utf-8"))
+    if ts is None:
+        ts = Timestamp(sec=int(time.time()), nsec=0)
+
+    ident_rot = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
+    ident_pose = Pose(position=Vector3(x=0.0, y=0.0, z=0.0), orientation=ident_rot)
+    entities: list[SceneEntity] = []
+
+    # 1. Search Boundary outline (+ 15 m buffer) in world ENU (x=east, y=north, z=up)
+    sb = scene.get("search_boundary")
+    if sb:
+        min_n, max_n = float(sb["min_north"]), float(sb["max_north"])
+        min_e, max_e = float(sb["min_east"]), float(sb["max_east"])
+        buf = float(sb.get("buffer_m", 15.0))
+        lines = [
+            LinePrimitive(
+                type=LinePrimitiveLineType.LineLoop,
+                pose=ident_pose,
+                thickness=1.2,
+                scale_invariant=False,
+                points=[
+                    Point3(x=min_e, y=min_n, z=0.5),
+                    Point3(x=max_e, y=min_n, z=0.5),
+                    Point3(x=max_e, y=max_n, z=0.5),
+                    Point3(x=min_e, y=max_n, z=0.5),
+                ],
+                color=Color(r=1.0, g=0.82, b=0.0, a=0.95),
+            ),
+            LinePrimitive(
+                type=LinePrimitiveLineType.LineLoop,
+                pose=ident_pose,
+                thickness=0.6,
+                scale_invariant=False,
+                points=[
+                    Point3(x=min_e - buf, y=min_n - buf, z=0.4),
+                    Point3(x=max_e + buf, y=min_n - buf, z=0.4),
+                    Point3(x=max_e + buf, y=max_n + buf, z=0.4),
+                    Point3(x=min_e - buf, y=max_n + buf, z=0.4),
+                ],
+                color=Color(r=1.0, g=0.50, b=0.0, a=0.65),
+            ),
+        ]
+        entities.append(
+            SceneEntity(
+                timestamp=ts,
+                frame_id="world",
+                id="search_boundary",
+                frame_locked=True,
+                lines=lines,
+            )
+        )
+
+    # 2. Terrain mesh from DEM (downsampled for lightweight WebSocket updates)
+    dp = Path(dem_path) if dem_path else None
+    if dp and dp.is_file() and dp.suffix.lower() == ".npz":
+        data = np.load(dp)
+        north_axis = data["north_axis"]
+        east_axis = data["east_axis"]
+        elev = data["elevation_m"]
+        stride = max(1, len(north_axis) // 32)
+        na = north_axis[::stride]
+        ea = east_axis[::stride]
+        zz = elev[::stride, ::stride]
+        z_min = float(zz.min())
+        z_span = max(1.0, float(zz.max()) - z_min)
+        tri_pts: list[Point3] = []
+        tri_cols: list[Color] = []
+
+        def elev_color(z_val: float) -> Color:
+            t = (z_val - z_min) / z_span
+            # Dry sandy field (matches worlds/suas_site ground texture)
+            return Color(r=0.42 + 0.22 * t, g=0.38 + 0.18 * t, b=0.28 + 0.12 * t, a=0.85)
+
+        for i in range(len(na) - 1):
+            for j in range(len(ea) - 1):
+                p00 = Point3(x=float(ea[j]), y=float(na[i]), z=float(zz[i, j]))
+                p10 = Point3(x=float(ea[j]), y=float(na[i + 1]), z=float(zz[i + 1, j]))
+                p01 = Point3(x=float(ea[j + 1]), y=float(na[i]), z=float(zz[i, j + 1]))
+                p11 = Point3(x=float(ea[j + 1]), y=float(na[i + 1]), z=float(zz[i + 1, j + 1]))
+                c00, c10 = elev_color(float(zz[i, j])), elev_color(float(zz[i + 1, j]))
+                c01, c11 = elev_color(float(zz[i, j + 1])), elev_color(float(zz[i + 1, j + 1]))
+                tri_pts.extend([p00, p01, p11, p00, p11, p10])
+                tri_cols.extend([c00, c01, c11, c00, c11, c10])
+
+        entities.append(
+            SceneEntity(
+                timestamp=ts,
+                frame_id="world",
+                id="site_terrain",
+                frame_locked=True,
+                triangles=[TriangleListPrimitive(pose=ident_pose, points=tri_pts, colors=tri_cols)],
+            )
+        )
+
+    # 3. Ground-truth targets and trees/debris
+    cubes: list[CubePrimitive] = []
+    cylinders: list[CylinderPrimitive] = []
+    spheres: list[SpherePrimitive] = []
+
+    for target in scene.get("targets", []):
+        x, y, z = float(target["east_m"]), float(target["north_m"]), float(target.get("elevation_m", 0.0))
+        if target["label"] == "tent":
+            cubes.append(
+                CubePrimitive(
+                    pose=Pose(position=Vector3(x=x, y=y, z=z + target["height_m"] * 0.5), orientation=ident_rot),
+                    size=Vector3(x=float(target["width_m"]), y=float(target["length_m"]), z=float(target["height_m"])),
+                    color=Color(r=0.08, g=0.30, b=0.92, a=0.95),
+                )
+            )
+        else:
+            cubes.append(
+                CubePrimitive(
+                    pose=Pose(position=Vector3(x=x, y=y, z=z + 0.25), orientation=ident_rot),
+                    size=Vector3(x=float(target["width_m"]) + 0.5, y=float(target["length_m"]) + 0.3, z=0.5),
+                    color=Color(r=0.94, g=0.22, b=0.10, a=0.95),
+                )
+            )
+
+    for obj in scene.get("objects", []):
+        x, y = float(obj["east_m"]), float(obj["north_m"])
+        if obj["kind"] == "tree":
+            r, h = float(obj["radius_m"]), float(obj["height_m"])
+            cylinders.append(
+                CylinderPrimitive(
+                    pose=Pose(position=Vector3(x=x, y=y, z=h * 0.225), orientation=ident_rot),
+                    size=Vector3(x=0.6, y=0.6, z=h * 0.45),
+                    bottom_scale=1.0,
+                    top_scale=0.8,
+                    color=Color(r=0.35, g=0.22, b=0.12, a=1.0),
+                )
+            )
+            spheres.append(
+                SpherePrimitive(
+                    pose=Pose(position=Vector3(x=x, y=y, z=h * 0.45 + r * 0.65), orientation=ident_rot),
+                    size=Vector3(x=r * 2.0, y=r * 2.0, z=r * 1.8),
+                    color=Color(r=0.16, g=0.38, b=0.14, a=0.9),
+                )
+            )
+        else:
+            h = float(obj["height_m"])
+            cubes.append(
+                CubePrimitive(
+                    pose=Pose(position=Vector3(x=x, y=y, z=h * 0.5), orientation=ident_rot),
+                    size=Vector3(x=float(obj["length_m"]), y=float(obj["width_m"]), z=h),
+                    color=Color(r=0.55, g=0.52, b=0.45, a=0.9),
+                )
+            )
+
+    if cubes or cylinders or spheres:
+        entities.append(
+            SceneEntity(
+                timestamp=ts,
+                frame_id="world",
+                id="site_objects",
+                frame_locked=True,
+                cubes=cubes,
+                cylinders=cylinders,
+                spheres=spheres,
+            )
+        )
+
+    return SceneUpdate(entities=entities)
+
+
+def _now_ts() -> Timestamp:
+    now_ns = int(time.time() * 1_000_000_000)
+    return Timestamp(sec=now_ns // 1_000_000_000, nsec=now_ns % 1_000_000_000)
+
+
+def _safe_log(topic: str, msg: Any) -> None:
+    """Best-effort Foxglove publish (no-op if server not running / import path only)."""
+    try:
+        foxglove.log(topic, msg)
+    except Exception:
+        pass
+
+
+# Accumulated mission visualization state (ENU: x=east, y=north, z=up)
+_FLOWN_TRACK: list[Point3] = []
+_FOOTPRINT_LINES: list[LinePrimitive] = []
+_LAST_FOOTPRINT_PUB = 0.0
+_MAX_FLOWN_POINTS = 4000
+_MAX_FOOTPRINTS = 200
+
+
+def publish_camera_frame(frame: Any, intrinsics: Optional[Any] = None, jpeg_quality: int = 80) -> None:
+    """Publish a live or replayed camera frame + calibration to Foxglove (/camera/image)."""
+    ok, encoded = cv2.imencode(".jpg", frame.image, [int(cv2.IMWRITE_JPEG_QUALITY), int(jpeg_quality)])
+    if not ok:
+        return
+
+    ts = _now_ts()
+    _safe_log(
+        "/camera/image",
+        CompressedImage(
+            timestamp=ts,
+            frame_id="nadir_camera",
+            data=encoded.tobytes(),
+            format="jpeg",
+        ),
+    )
+    if intrinsics is not None:
+        fx, fy, cx, cy = float(intrinsics.fx), float(intrinsics.fy), float(intrinsics.cx), float(intrinsics.cy)
+        _safe_log(
+            "/camera/camera_info",
+            CameraCalibration(
+                timestamp=ts,
+                frame_id="nadir_camera",
+                width=int(intrinsics.width),
+                height=int(intrinsics.height),
+                distortion_model="plumb_bob",
+                D=list(intrinsics.dist_coeffs),
+                K=[fx, 0.0, cx, 0.0, fy, cy, 0.0, 0.0, 1.0],
+                R=[1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0],
+                P=[fx, 0.0, cx, 0.0, 0.0, fy, cy, 0.0, 0.0, 0.0, 1.0, 0.0],
+            ),
+        )
+
+
+def publish_mission_status(status: dict[str, Any]) -> None:
+    """Publish unambiguous mission phase / laps / battery (MAST-L2-ASW-19)."""
+    payload = {
+        "phase": str(status.get("phase", "UNKNOWN")),
+        "completed_laps": int(status.get("completed_laps", 0)),
+        "target_laps": int(status.get("target_laps", 0)),
+        "lap_locked": bool(status.get("lap_locked", False)),
+        "battery_pct": float(status.get("battery_pct", 0.0)),
+        "current_waypoint_index": int(status.get("current_waypoint_index", 0)),
+        "abort_requested": bool(status.get("abort_requested", False)),
+        "abort_reason": status.get("abort_reason"),
+    }
+    _safe_log("/mission", payload)
+
+
+def publish_ned_path(
+    entity_id: str,
+    waypoints_ne: list[tuple[float, float, float]] | list[Any],
+    *,
+    color: Color,
+    thickness: float = 2.0,
+    z_offset_m: float = 1.0,
+) -> None:
+    """Publish a path of (north, east[, height]) waypoints as a /scene line strip."""
+    if not waypoints_ne:
+        return
+    pts: list[Point3] = []
+    for wp in waypoints_ne:
+        if hasattr(wp, "north"):
+            n, e, h = float(wp.north), float(wp.east), float(getattr(wp, "height", 50.0))
+        else:
+            n, e = float(wp[0]), float(wp[1])
+            h = float(wp[2]) if len(wp) > 2 else 50.0
+        pts.append(Point3(x=e, y=n, z=h + z_offset_m))
+    if len(pts) < 2:
+        return
+    ident = Pose(position=Vector3(x=0.0, y=0.0, z=0.0), orientation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0))
+    _safe_log(
+        "/scene",
+        SceneUpdate(
+            entities=[
+                SceneEntity(
+                    timestamp=_now_ts(),
+                    frame_id="world",
+                    id=entity_id,
+                    frame_locked=True,
+                    lines=[
+                        LinePrimitive(
+                            type=LinePrimitiveLineType.LineStrip,
+                            pose=ident,
+                            thickness=thickness,
+                            scale_invariant=False,
+                            points=pts,
+                            color=color,
+                        )
+                    ],
+                )
+            ]
+        ),
+    )
+
+
+def append_flown_track(north_m: float, east_m: float, alt_m: float = 50.0) -> None:
+    """Append a flown sample and republish the track polyline."""
+    global _FLOWN_TRACK
+    _FLOWN_TRACK.append(Point3(x=float(east_m), y=float(north_m), z=float(alt_m)))
+    if len(_FLOWN_TRACK) > _MAX_FLOWN_POINTS:
+        _FLOWN_TRACK = _FLOWN_TRACK[-_MAX_FLOWN_POINTS:]
+    if len(_FLOWN_TRACK) < 2:
+        return
+    ident = Pose(position=Vector3(x=0.0, y=0.0, z=0.0), orientation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0))
+    _safe_log(
+        "/scene",
+        SceneUpdate(
+            entities=[
+                SceneEntity(
+                    timestamp=_now_ts(),
+                    frame_id="world",
+                    id="flown_track",
+                    frame_locked=True,
+                    lines=[
+                        LinePrimitive(
+                            type=LinePrimitiveLineType.LineStrip,
+                            pose=ident,
+                            thickness=1.4,
+                            scale_invariant=False,
+                            points=list(_FLOWN_TRACK),
+                            color=Color(r=0.15, g=0.75, b=1.0, a=0.95),
+                        )
+                    ],
+                )
+            ]
+        ),
+    )
+
+
+def publish_capture_footprint(corners_ne: list[tuple[float, float]], *, force: bool = False) -> None:
+    """Accumulate a frame ground footprint (N/E corners) and publish coverage outlines."""
+    global _FOOTPRINT_LINES, _LAST_FOOTPRINT_PUB
+    if len(corners_ne) < 3:
+        return
+    ident = Pose(position=Vector3(x=0.0, y=0.0, z=0.0), orientation=Quaternion(x=0.0, y=0.0, z=0.0, w=1.0))
+    pts = [Point3(x=float(e), y=float(n), z=0.3) for n, e in corners_ne]
+    _FOOTPRINT_LINES.append(
+        LinePrimitive(
+            type=LinePrimitiveLineType.LineLoop,
+            pose=ident,
+            thickness=0.35,
+            scale_invariant=False,
+            points=pts,
+            color=Color(r=0.2, g=0.95, b=0.55, a=0.55),
+        )
+    )
+    if len(_FOOTPRINT_LINES) > _MAX_FOOTPRINTS:
+        _FOOTPRINT_LINES = _FOOTPRINT_LINES[-_MAX_FOOTPRINTS:]
+    now = time.time()
+    if not force and (now - _LAST_FOOTPRINT_PUB) < 0.5:
+        return
+    _LAST_FOOTPRINT_PUB = now
+    _safe_log(
+        "/scene",
+        SceneUpdate(
+            entities=[
+                SceneEntity(
+                    timestamp=_now_ts(),
+                    frame_id="world",
+                    id="capture_footprints",
+                    frame_locked=True,
+                    lines=list(_FOOTPRINT_LINES),
+                )
+            ]
+        ),
+    )
+
+
+def publish_declared_targets(targets: list[Any]) -> None:
+    """Publish SEARCH-declared targets (distinct from scene.json ground-truth markers)."""
+    cubes: list[CubePrimitive] = []
+    spheres: list[SpherePrimitive] = []
+    ident_rot = Quaternion(x=0.0, y=0.0, z=0.0, w=1.0)
+    for t in targets:
+        label = str(getattr(t, "label", "target"))
+        n = float(getattr(t, "north_m", 0.0))
+        e = float(getattr(t, "east_m", 0.0))
+        if label == "tent":
+            cubes.append(
+                CubePrimitive(
+                    pose=Pose(position=Vector3(x=e, y=n, z=2.5), orientation=ident_rot),
+                    size=Vector3(x=4.0, y=4.0, z=3.0),
+                    color=Color(r=0.15, g=0.85, b=1.0, a=0.85),
+                )
+            )
+        else:
+            spheres.append(
+                SpherePrimitive(
+                    pose=Pose(position=Vector3(x=e, y=n, z=1.5), orientation=ident_rot),
+                    size=Vector3(x=2.5, y=2.5, z=2.5),
+                    color=Color(r=1.0, g=0.85, b=0.1, a=0.9),
+                )
+            )
+    _safe_log(
+        "/scene",
+        SceneUpdate(
+            entities=[
+                SceneEntity(
+                    timestamp=_now_ts(),
+                    frame_id="world",
+                    id="declared_targets",
+                    frame_locked=True,
+                    cubes=cubes,
+                    spheres=spheres,
+                )
+            ]
+        ),
+    )
+    _safe_log(
+        "/targets/declared",
+        {
+            "count": len(targets),
+            "targets": [
+                {
+                    "label": str(getattr(t, "label", "")),
+                    "north_m": float(getattr(t, "north_m", 0.0)),
+                    "east_m": float(getattr(t, "east_m", 0.0)),
+                    "confidence": float(getattr(t, "confidence", 0.0)),
+                    "observations": int(getattr(t, "observations", 0)),
+                }
+                for t in targets
+            ],
+        },
+    )
+
+
+def publish_orthomosaic(map_path: str | Path, jpeg_quality: int = 85) -> bool:
+    """Publish a completed risk-map PNG/JPEG to /map/orthomosaic for the Image panel."""
+    path = Path(map_path)
+    if not path.is_file():
+        return False
+    img = cv2.imread(str(path), cv2.IMREAD_COLOR)
+    if img is None:
+        return False
+    # Downscale huge orthos so Foxglove stays responsive
+    h, w = img.shape[:2]
+    max_dim = 1600
+    if max(h, w) > max_dim:
+        scale = max_dim / float(max(h, w))
+        img = cv2.resize(img, (int(w * scale), int(h * scale)), interpolation=cv2.INTER_AREA)
+    ok, encoded = cv2.imencode(".jpg", img, [int(cv2.IMWRITE_JPEG_QUALITY), int(jpeg_quality)])
+    if not ok:
+        return False
+    _safe_log(
+        "/map/orthomosaic",
+        CompressedImage(
+            timestamp=_now_ts(),
+            frame_id="map",
+            data=encoded.tobytes(),
+            format="jpeg",
+        ),
+    )
+    _safe_log("/map/status", {"path": str(path), "ready": True, "width": int(img.shape[1]), "height": int(img.shape[0])})
+    return True
+
+
+def watch_orthomosaic_file(map_path: str | Path, poll_s: float = 2.0, timeout_s: float = 600.0) -> None:
+    """Background helper: wait for mapper output and publish it once."""
+    path = Path(map_path)
+    deadline = time.time() + timeout_s
+    last_mtime = -1.0
+    while time.time() < deadline:
+        if path.is_file():
+            mtime = path.stat().st_mtime
+            if mtime != last_mtime and path.stat().st_size > 0:
+                if publish_orthomosaic(path):
+                    print(f"Foxglove: published orthomosaic from {path}")
+                    return
+                last_mtime = mtime
+        time.sleep(poll_s)
+
+
+async def run_foxglove_telemetry_loop(
+    drone: Any,
+    port: int = 8765,
+    scene_path: Optional[str | Path] = None,
+    dem_path: Optional[str | Path] = None,
+) -> None:
     """Continuously stream PX4 telemetry and 3D transforms to Foxglove Studio."""
     try:
         foxglove.start_server(port=port)
         print(f"Foxglove WebSocket server listening on ws://localhost:{port}")
     except Exception as error:
         print(f"Foxglove server already running or failed to bind port {port}: {error}")
+
+    repo_root = Path(__file__).resolve().parents[1]
+    resolved_scene = Path(scene_path) if scene_path else (repo_root / "worlds" / "suas_site" / "scene.json")
+    resolved_dem = Path(dem_path) if dem_path else (repo_root / "worlds" / "suas_site" / "dem.npz")
 
     state = TelemetryState()
 
@@ -207,6 +695,7 @@ async def run_foxglove_telemetry_loop(drone: Any, port: int = 8765) -> None:
 
     last_scene_publish = 0.0
     last_gps_publish = 0.0
+    last_track_sample = 0.0
 
     try:
         while True:
@@ -214,10 +703,18 @@ async def run_foxglove_telemetry_loop(drone: Any, port: int = 8765) -> None:
             now_ns = int(now_sec * 1_000_000_000)
             ts = Timestamp(sec=now_ns // 1_000_000_000, nsec=now_ns % 1_000_000_000)
 
-            # 1. Publish 3D Airplane Model to /scene periodically (every 2 seconds)
+            # 1. Publish 3D Airplane Model + site terrain/targets to /scene periodically (every 2 seconds)
             if now_sec - last_scene_publish >= 2.0:
                 foxglove.log("/scene", build_airplane_entity(ts))
+                site_update = build_site_scene_update(resolved_scene, resolved_dem, ts)
+                if site_update is not None:
+                    foxglove.log("/scene", site_update)
                 last_scene_publish = now_sec
+
+            # 1b. Flown track breadcrumb (~2 Hz)
+            if now_sec - last_track_sample >= 0.5 and (abs(state.north_m) + abs(state.east_m)) > 0.01:
+                append_flown_track(state.north_m, state.east_m, max(1.0, state.rel_alt_m))
+                last_track_sample = now_sec
 
             # 2. Publish 3D Transform to /tf (World -> Drone)
             # In ENU: X=East, Y=North, Z=Up
