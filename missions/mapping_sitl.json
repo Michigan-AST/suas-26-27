@@ -1,0 +1,69 @@
+{
+  "name": "mapping_sitl",
+  "takeoff_height": 50.0,
+  "target_laps": 1,
+  "min_battery_pct": 20.0,
+  "auto_plan_survey": true,
+  "survey_altitude_m": 50.0,
+  "survey_speed_m_s": 18.0,
+  "lap_waypoints": [
+    {
+      "north": 0.0,
+      "east": 500.0,
+      "height": 50.0
+    },
+    {
+      "north": 500.0,
+      "east": 500.0,
+      "height": 50.0
+    },
+    {
+      "north": 500.0,
+      "east": 0.0,
+      "height": 50.0
+    },
+    {
+      "north": 0.0,
+      "east": 0.0,
+      "height": 50.0
+    }
+  ],
+  "survey_waypoints": [],
+  "delivery_waypoints": [
+    {
+      "north": 760.0,
+      "east": 265.0,
+      "height": 45.7
+    },
+    {
+      "north": 835.0,
+      "east": 330.0,
+      "height": 45.7
+    }
+  ],
+  "search_boundary": {
+    "min_north": 700.0,
+    "max_north": 900.0,
+    "min_east": 200.0,
+    "max_east": 400.0,
+    "buffer_m": 25.0
+  },
+  "camera": {
+    "source": "gazebo",
+    "url": "http://127.0.0.1:8554/latest.jpg",
+    "rate_hz": 2.0,
+    "capture_dir": "captures",
+    "world_scene": "worlds/suas_site/scene.json",
+    "dem_path": "worlds/suas_site/dem.npz",
+    "mapper_backend": "auto",
+    "intrinsics": {
+      "camera_id": "nadir_6mm",
+      "width": 1280,
+      "height": 960,
+      "horizontal_fov_rad": 0.967
+    }
+  },
+  "landing_north": 0.0,
+  "landing_east": 0.0,
+  "landing_runway_heading_deg": 0.0
+}

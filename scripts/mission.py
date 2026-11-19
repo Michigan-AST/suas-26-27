@@ -45,6 +45,8 @@ LandAtFn = Callable[[Any, float, float, float], Awaitable[None]]
 LoiterFn = Callable[[Any], Awaitable[None]]
 BatteryFn = Callable[[], Awaitable[float]]
 LogFn = Callable[[str], None]
+SurveyFn = Callable[[Any, list["Waypoint"]], Awaitable[None]]
+SearchFn = Callable[[Optional[Path]], Awaitable[list["Waypoint"]]]
 
 
 class WaypointDict(TypedDict):
@@ -219,6 +221,10 @@ class MissionConfig:
     landing_north: float = 0.0
     landing_east: float = 0.0
     landing_runway_heading_deg: float = 0.0
+    camera: Optional[dict[str, Any]] = None
+    auto_plan_survey: bool = False
+    survey_altitude_m: float = 50.0
+    survey_speed_m_s: float = 18.0
 
     def validate(self) -> None:
         """Validate config parameters against competition and safety rules."""
@@ -254,7 +260,7 @@ class MissionConfig:
 
     def to_dict(self) -> MissionConfigDict:
         """Serialize configuration to a dictionary."""
-        return {
+        data: dict[str, Any] = {
             "name": self.name,
             "takeoff_height": self.takeoff_height,
             "target_laps": self.target_laps,
@@ -267,6 +273,13 @@ class MissionConfig:
             "landing_east": self.landing_east,
             "landing_runway_heading_deg": self.landing_runway_heading_deg,
         }
+        if self.camera is not None:
+            data["camera"] = self.camera
+        if self.auto_plan_survey:
+            data["auto_plan_survey"] = True
+            data["survey_altitude_m"] = self.survey_altitude_m
+            data["survey_speed_m_s"] = self.survey_speed_m_s
+        return data  # type: ignore[return-value]
 
     @classmethod
     def from_dict(cls: type[MissionConfig], data: dict[str, Any] | MissionConfigDict) -> MissionConfig:
@@ -285,6 +298,10 @@ class MissionConfig:
             landing_north=float(data.get("landing_north", 0.0)),
             landing_east=float(data.get("landing_east", 0.0)),
             landing_runway_heading_deg=float(data.get("landing_runway_heading_deg", 0.0)),
+            camera=data.get("camera"),
+            auto_plan_survey=bool(data.get("auto_plan_survey", False)),
+            survey_altitude_m=float(data.get("survey_altitude_m", 50.0)),
+            survey_speed_m_s=float(data.get("survey_speed_m_s", 18.0)),
         )
 
     def to_json_file(self, path: str | Path) -> None:
@@ -319,6 +336,7 @@ class MissionState:
     current_waypoint_index: int = 0
     abort_requested: bool = False
     abort_reason: Optional[str] = None
+    capture_dir: Optional[Path] = None
     transition_log: list[TransitionRecord] = field(default_factory=list)
 
 
@@ -335,6 +353,12 @@ class MissionRunner:
         loiter_fn: Optional[LoiterFn] = None,
         battery_fn: Optional[BatteryFn] = None,
         log_fn: Optional[LogFn] = None,
+        survey_fn: Optional[SurveyFn] = None,
+        capture_controller: Optional[Any] = None,
+        search_fn: Optional[SearchFn] = None,
+        on_survey_complete: Optional[Callable[[Optional[Path]], None]] = None,
+        on_status: Optional[Callable[[MissionStatusDict], None]] = None,
+        on_survey_plan: Optional[Callable[[list[Waypoint]], None]] = None,
     ) -> None:
         self.drone: Union[Drone, Any] = drone
         self.config: MissionConfig = config
@@ -356,10 +380,24 @@ class MissionRunner:
 
         self.battery_fn: Optional[BatteryFn] = battery_fn
         self.log_fn: LogFn = log_fn or print
+        self.survey_fn: Optional[SurveyFn] = survey_fn
+        self.capture_controller: Optional[Any] = capture_controller
+        self.search_fn: Optional[SearchFn] = search_fn
+        self.on_survey_complete: Optional[Callable[[Optional[Path]], None]] = on_survey_complete
+        self.on_status: Optional[Callable[[MissionStatusDict], None]] = on_status
+        self.on_survey_plan: Optional[Callable[[list[Waypoint]], None]] = on_survey_plan
 
     def log(self, message: str) -> None:
         """Format and emit a mission log entry."""
         self.log_fn(f"[MISSION {datetime.now(timezone.utc).strftime('%H:%M:%S')}] {message}")
+
+    def _emit_status(self) -> None:
+        if self.on_status is None:
+            return
+        try:
+            self.on_status(self.get_status())
+        except Exception:
+            pass
 
     def transition_to(self, new_phase: MissionPhase, reason: str = "") -> None:
         """Validate and apply a state transition with logging (MAST-L2-ASW-18)."""
@@ -378,6 +416,7 @@ class MissionRunner:
         self.state.transition_log.append(record)
         self.state.phase = new_phase
         self.log(f"Phase transition: {current.value} -> {new_phase.value} (reason: {reason})")
+        self._emit_status()
 
     def request_abort(self, reason: str = "Operator abort") -> None:
         """Trigger an immediate safe autonomous abort to loiter (MAST-L2-ASW-13)."""
@@ -406,6 +445,7 @@ class MissionRunner:
             try:
                 pct = await self.battery_fn()
                 self.state.battery_pct = pct
+                self._emit_status()
                 return pct
             except Exception as err:
                 self.log(f"Telemetry warning: failed to read battery: {err}")
@@ -417,6 +457,7 @@ class MissionRunner:
                     if hasattr(batt, "remaining_percent") and batt.remaining_percent is not None:
                         self.state.battery_pct = batt.remaining_percent * 100.0
                     break
+                self._emit_status()
             except Exception:
                 pass
         return self.state.battery_pct
@@ -556,24 +597,87 @@ class MissionRunner:
             lock_reason = "Curtailment due to energy reserve" if lap_curtailed else "Target laps completed"
             self.log(f"Lap count locked permanently at {self.state.completed_laps} (L0-END-05: {lock_reason})")
 
-            # 4. SURVEY (Lawnmower pattern)
+            # 4. SURVEY (Lawnmower pattern + optional synchronized camera capture)
             if self.state.completed_laps < 1:
                 # Rule L0-MSN-04: At least 1 lap must be completed before entering Search Boundary
                 # TODO: Go back and try to do laps if none completed
                 self.log("Skipping SURVEY phase: 0 laps completed (L0-MSN-04 requires at least 1 lap)")
             else:
-                if not await self._execute_waypoint_phase(
-                    MissionPhase.SURVEY,
-                    reason="Laps complete; beginning lawnmower survey",
-                ):
-                    return
+                survey_waypoints = list(self.config.survey_waypoints)
+                if not survey_waypoints and self.config.auto_plan_survey and self.config.search_boundary is not None:
+                    from perception.camera import CameraConfig
+                    from perception.survey_planner import plan_boustrophedon_survey
+
+                    cam_cfg = CameraConfig.from_dict(self.config.camera) if isinstance(self.config.camera, dict) else CameraConfig()
+                    plan = plan_boustrophedon_survey(
+                        boundary=self.config.search_boundary,
+                        intrinsics=cam_cfg.intrinsics,
+                        altitude_agl_m=self.config.survey_altitude_m,
+                    )
+                    survey_waypoints = plan.waypoints
+                    self.log(
+                        f"Auto-planned survey: {plan.pass_count} passes, "
+                        f"stride={plan.across_track_stride_m} m, trigger={plan.along_track_trigger_m} m"
+                    )
+
+                if survey_waypoints and self.on_survey_plan is not None:
+                    try:
+                        self.on_survey_plan(survey_waypoints)
+                    except Exception:
+                        pass
+
+                capture_started = False
+                try:
+                    if self.capture_controller is not None:
+                        self.state.capture_dir = await self.capture_controller.start()
+                        capture_started = True
+                        self.log(f"Camera capture started -> {self.state.capture_dir}")
+
+                    if self.survey_fn is not None and survey_waypoints:
+                        if self.state.abort_requested:
+                            await self._handle_abort()
+                            return
+                        self.transition_to(MissionPhase.SURVEY, reason="Laps complete; beginning lawnmower survey")
+                        await self.survey_fn(self.drone, survey_waypoints)
+                        if self.state.abort_requested:
+                            await self._handle_abort()
+                            return
+                    else:
+                        if not await self._execute_waypoint_phase(
+                            MissionPhase.SURVEY,
+                            reason="Laps complete; beginning lawnmower survey",
+                            waypoints=survey_waypoints,
+                        ):
+                            return
+                finally:
+                    if capture_started and self.capture_controller is not None:
+                        try:
+                            self.state.capture_dir = await self.capture_controller.stop()
+                            self.log(f"Camera capture stopped ({self.state.capture_dir})")
+                        except Exception as cap_err:
+                            self.log(f"Capture stop warning: {cap_err}")
+
+                if self.on_survey_complete is not None and not self.state.abort_requested:
+                    try:
+                        self.on_survey_complete(self.state.capture_dir)
+                    except Exception as cb_err:
+                        self.log(f"Post-survey callback warning: {cb_err}")
 
             # 5. SEARCH
             if self.state.completed_laps >= 1 and not self.state.abort_requested:
                 self.transition_to(MissionPhase.SEARCH, reason="Survey complete; searching for targets")
 
-                # TODO: gather camera data from survey, feed into CV model to find person and shelter
-                # then, geolocate positions and set those to delivery_waypoints
+                if self.search_fn is not None:
+                    try:
+                        detected_wps = await self.search_fn(self.state.capture_dir)
+                        if detected_wps:
+                            self.config.delivery_waypoints = detected_wps
+                            self.log(f"Declared {len(detected_wps)} target(s) for delivery.")
+                        else:
+                            self.log("No targets declared by perception; retaining configured delivery waypoints.")
+                    except Exception as search_err:
+                        # Fault isolation (MAST-L2-ASW-12): detection error must not prevent landing
+                        self.log(f"Search pipeline error (continuing mission): {search_err}")
 
             # 6. DELIVERY
             if self.state.completed_laps < 1:
@@ -647,15 +751,6 @@ def create_default_mission() -> MissionConfig:
         max_east=400.0,
         buffer_m=25.0,
     )
-    # Lawnmower pattern inside search boundary
-    survey: list[Waypoint] = [
-        Waypoint(north=720.0, east=220.0, height=50.0),
-        Waypoint(north=880.0, east=220.0, height=50.0),
-        Waypoint(north=880.0, east=270.0, height=50.0),
-        Waypoint(north=720.0, east=270.0, height=50.0),
-        Waypoint(north=720.0, east=320.0, height=50.0),
-        Waypoint(north=880.0, east=320.0, height=50.0),
-    ]
     # Delivery target drops (mannequin at WP1, tent at WP2)
     delivery: list[Waypoint] = [
         Waypoint(north=750.0, east=250.0, height=45.7),
@@ -668,9 +763,12 @@ def create_default_mission() -> MissionConfig:
         target_laps=1,
         min_battery_pct=20.0,
         lap_waypoints=lap,
-        survey_waypoints=survey,
+        survey_waypoints=[],  # Generated at runtime via auto_plan_survey
         delivery_waypoints=delivery,
         search_boundary=boundary,
+        auto_plan_survey=True,
+        survey_altitude_m=50.0,
+        survey_speed_m_s=18.0,
         landing_north=0.0,
         landing_east=0.0,
         landing_runway_heading_deg=0.0,
