@@ -86,8 +86,8 @@ class TestMissionLoop(unittest.IsolatedAsyncioTestCase):
         self.loiter_mock.assert_not_called()
 
         # Check total waypoints flown:
-        # 4 lap waypoints + 6 survey waypoints + 2 delivery waypoints + 1 return waypoint = 13
-        self.assertEqual(self.fly_to_mock.await_count, 13)
+        # 4 lap + 14 auto-planned survey + 2 delivery + 1 return = 21
+        self.assertEqual(self.fly_to_mock.await_count, 21)
 
     async def test_lap_counting_and_multi_lap_execution(self) -> None:
         """MAST-L2-ASW-04: Test tracking multiple laps and advancing only when target is met."""
@@ -100,8 +100,8 @@ class TestMissionLoop(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(runner.state.completed_laps, 3)
         self.assertTrue(runner.state.lap_locked)
 
-        # Lap waypoints (4 per lap * 3 laps = 12) + 6 survey + 2 delivery + 1 return = 21
-        self.assertEqual(self.fly_to_mock.await_count, 21)
+        # Lap waypoints (4 per lap * 3 laps = 12) + 14 auto-planned survey + 2 delivery + 1 return = 29
+        self.assertEqual(self.fly_to_mock.await_count, 29)
 
     async def test_search_boundary_exclusion_zone_validation(self) -> None:
         """MAST-L2-ASW-03: Lap waypoints within Search Boundary 25m buffer must be rejected."""
@@ -274,7 +274,10 @@ class TestMissionLoop(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(path.exists(), f"{filename} does not exist")
             cfg = MissionConfig.from_json_file(path)
             self.assertGreater(len(cfg.lap_waypoints), 0)
-            self.assertGreater(len(cfg.survey_waypoints), 0)
+            self.assertTrue(
+                len(cfg.survey_waypoints) > 0 or cfg.auto_plan_survey,
+                f"{filename} needs survey waypoints or auto_plan_survey",
+            )
             self.assertIsNotNone(cfg.search_boundary)
 
         loop_path = Path(__file__).resolve().parents[1] / "missions" / "loop.json"
@@ -295,13 +298,18 @@ class TestMissionLoop(unittest.IsolatedAsyncioTestCase):
     async def test_execute_waypoint_phase_nominal_and_empty(self) -> None:
         """Verify _execute_waypoint_phase transitions, reads waypoints, and flies them."""
         config = create_default_mission()
+        survey_wps = [
+            Waypoint(north=720.0, east=220.0, height=50.0),
+            Waypoint(north=880.0, east=220.0, height=50.0),
+        ]
+        config.survey_waypoints = survey_wps
         runner, _ = self._create_runner(config)
 
         # Test nominal execution reading from config
         success = await runner.execute_waypoint_phase(MissionPhase.SURVEY, reason="Testing survey phase")
         self.assertTrue(success)
         self.assertEqual(runner.state.phase, MissionPhase.SURVEY)
-        self.assertEqual(self.fly_to_mock.await_count, len(config.survey_waypoints))
+        self.assertEqual(self.fly_to_mock.await_count, len(survey_wps))
 
         # Test phase with no waypoints configured
         config.delivery_waypoints = []
@@ -315,6 +323,10 @@ class TestMissionLoop(unittest.IsolatedAsyncioTestCase):
     async def test_execute_waypoint_phase_abort_handling(self) -> None:
         """Verify abort handling before and during execute_waypoint_phase."""
         config = create_default_mission()
+        config.survey_waypoints = [
+            Waypoint(north=720.0, east=220.0, height=50.0),
+            Waypoint(north=880.0, east=220.0, height=50.0),
+        ]
         runner, _ = self._create_runner(config)
 
         # Test abort before execution
@@ -342,12 +354,14 @@ class TestMissionLoop(unittest.IsolatedAsyncioTestCase):
         import drone_control
 
         drone = Mock()
-        mission_path = Path(__file__).resolve().parents[1] / "missions" / "default_mission.json"
+        mission_path = Path(__file__).resolve().parents[1] / "missions" / "mapping_sitl.json"
 
         with patch.object(drone_control, "takeoff", AsyncMock()), \
              patch.object(drone_control, "fly_to", AsyncMock()), \
+             patch.object(drone_control, "fly_survey", AsyncMock()), \
              patch.object(drone_control, "land_at", AsyncMock()), \
-             patch.object(drone_control, "loiter", AsyncMock()):
+             patch.object(drone_control, "loiter", AsyncMock()), \
+             patch("perception.camera.create_frame_source", return_value=None):
             await drone_control.run_mission(drone, mission_path)
 
 

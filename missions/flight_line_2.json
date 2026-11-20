@@ -3,6 +3,9 @@
   "takeoff_height": 50.0,
   "target_laps": 2,
   "min_battery_pct": 20.0,
+  "auto_plan_survey": true,
+  "survey_altitude_m": 50.0,
+  "survey_speed_m_s": 18.0,
   "lap_waypoints": [
     {
       "north": 0,
@@ -25,38 +28,7 @@
       "height": 50
     }
   ],
-  "survey_waypoints": [
-    {
-      "north": 650,
-      "east": -350,
-      "height": 50
-    },
-    {
-      "north": 850,
-      "east": -350,
-      "height": 50
-    },
-    {
-      "north": 850,
-      "east": -300,
-      "height": 50
-    },
-    {
-      "north": 650,
-      "east": -300,
-      "height": 50
-    },
-    {
-      "north": 650,
-      "east": -250,
-      "height": 50
-    },
-    {
-      "north": 850,
-      "east": -250,
-      "height": 50
-    }
-  ],
+  "survey_waypoints": [],
   "delivery_waypoints": [
     {
       "north": 700,
@@ -80,4 +52,3 @@
   "landing_east": 0.0,
   "landing_runway_heading_deg": 90.0
 }
-

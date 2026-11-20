@@ -155,8 +155,10 @@ class StarterFlight(unittest.IsolatedAsyncioTestCase):
     def test_resolve_mission_path_aliases(self):
         missions_dir = Path(__file__).resolve().parents[1] / "missions"
 
-        self.assertEqual(flight.resolve_mission_path(None), missions_dir / "default_mission.json")
-        self.assertEqual(flight.resolve_mission_path("default"), missions_dir / "default_mission.json")
+        self.assertEqual(flight.resolve_mission_path(None), missions_dir / "mapping_sitl.json")
+        self.assertEqual(flight.resolve_mission_path("default"), missions_dir / "mapping_sitl.json")
+        self.assertEqual(flight.resolve_mission_path("mapping_sitl"), missions_dir / "mapping_sitl.json")
+        self.assertEqual(flight.resolve_mission_path("default_mission"), missions_dir / "default_mission.json")
         self.assertEqual(flight.resolve_mission_path("loop"), missions_dir / "loop.json")
         self.assertEqual(flight.resolve_mission_path("flight_line_1"), missions_dir / "flight_line_1.json")
         self.assertEqual(flight.resolve_mission_path("flight_line_2"), missions_dir / "flight_line_2.json")

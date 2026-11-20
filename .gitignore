@@ -4,6 +4,7 @@ shell.nix
 **/__pycache__
 *.lock
 runs/
+captures/
 *.pt
 *.jpg
 main.py

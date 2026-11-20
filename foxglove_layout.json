@@ -30,6 +30,37 @@
         }
       }
     },
+    "Image!1": {
+      "cameraState": {
+        "distance": 20,
+        "perspective": true,
+        "phi": 60,
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "thetaOffset": 45
+      },
+      "followMode": "follow-pose",
+      "imageMode": {
+        "imageTopic": "/camera/image",
+        "calibrationTopic": "/camera/camera_info"
+      }
+    },
+    "Image!2": {
+      "cameraState": {
+        "distance": 20,
+        "perspective": true,
+        "phi": 60,
+        "target": [0, 0, 0],
+        "targetOffset": [0, 0, 0],
+        "targetOrientation": [0, 0, 0, 1],
+        "thetaOffset": 45
+      },
+      "followMode": "follow-pose",
+      "imageMode": {
+        "imageTopic": "/map/orthomosaic"
+      }
+    },
     "Plot!1": {
       "title": "Altitude & Airspeed",
       "showLegend": true,
@@ -56,7 +87,7 @@
       ]
     },
     "Plot!2": {
-      "title": "Attitude (Pitch & Roll)",
+      "title": "Attitude & Battery",
       "showLegend": true,
       "legendPosition": "top",
       "paths": [
@@ -73,6 +104,18 @@
           "color": "#a78bfa"
         },
         {
+          "value": "/telemetry.battery_pct",
+          "enabled": true,
+          "label": "Battery (%)",
+          "color": "#2ecc71"
+        },
+        {
+          "value": "/mission.battery_pct",
+          "enabled": false,
+          "label": "Mission battery (%)",
+          "color": "#27ae60"
+        },
+        {
           "value": "/telemetry.yaw_deg",
           "enabled": false,
           "label": "Yaw (deg)",
@@ -80,8 +123,22 @@
         }
       ]
     },
+    "RawMessages!1": {
+      "topicPath": "/mission",
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showDiff": false
+    },
+    "RawMessages!2": {
+      "topicPath": "/targets/declared",
+      "diffEnabled": false,
+      "diffMethod": "custom",
+      "diffTopicPath": "",
+      "showDiff": false
+    },
     "Map!1": {
-      "center": [47.397742, 8.545594],
+      "center": [47.397971, 8.546164],
       "zoom": 16,
       "followTopic": "/gps",
       "layer": "satellite"
@@ -94,7 +151,17 @@
   },
   "layout": {
     "direction": "row",
-    "first": "3D!1",
+    "first": {
+      "direction": "column",
+      "first": "3D!1",
+      "second": {
+        "direction": "row",
+        "first": "Image!1",
+        "second": "Image!2",
+        "splitPercentage": 50
+      },
+      "splitPercentage": 58
+    },
     "second": {
       "direction": "column",
       "first": {
@@ -103,10 +170,19 @@
         "second": "Plot!2",
         "splitPercentage": 50
       },
-      "second": "Map!1",
-      "splitPercentage": 45
+      "second": {
+        "direction": "row",
+        "first": {
+          "direction": "column",
+          "first": "RawMessages!1",
+          "second": "RawMessages!2",
+          "splitPercentage": 50
+        },
+        "second": "Map!1",
+        "splitPercentage": 42
+      },
+      "splitPercentage": 40
     },
     "splitPercentage": 58
   }
 }
-

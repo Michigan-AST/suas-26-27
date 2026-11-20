@@ -7,6 +7,7 @@ Code and documentation for the M-AST 2026-27 drone for the S.U.A.S competition.
 - **Docker Desktop** (macOS/Linux/Windows)
 - **QGroundControl** (installed on host)
 - **Python 3.9+** and `make`
+- **tmux** + **Foxglove Studio** (for `make up`)
 
 ## Quick Start
 
@@ -16,74 +17,63 @@ In Docker Desktop, navigate to **Settings > Resources > Network** and enable **E
 
 Make sure Docker Desktop is running, if you're using it.
 
-### 2. Launch QGroundControl
-
-Open the **QGroundControl** application on your computer. Just leave it running in the background. It listens on UDP port `14550`.
-
-### 3. Start the SITL Simulation
-
-From the repository root, start PX4 and the Gazebo simulation:
+### 2. One-command SITL + mission (recommended)
 
 ```bash
-make sitl
+brew install tmux                 # once
+brew install --cask foxglove      # once, if needed
+make up                           # opens QGC + Foxglove, then tmux: sitl | mission | scratch
 ```
 
-To speed up the simulation (e.g. 2x real-time speed):
+This opens **QGroundControl** and **Foxglove Studio** (WebSocket `ws://localhost:8765`), then starts PX4 + Gazebo + nadir camera (`make sitl`), waits until `http://127.0.0.1:8554/health` is ready, and runs `mapping_sitl`. Foxglove telemetry starts with the mission. Import [`foxglove_layout.json`](foxglove_layout.json) once via **Layout → Import from file…** (re-import after pulling layout updates). Detach with `Ctrl-b d`; `make down` stops tmux + Docker (leaves QGC/Foxglove running). Skip host apps with `SUAS_SKIP_APPS=1 make up`.
+
+Foxglove during a mapping flight shows: 3D site + survey plan + flown track + capture footprints, nadir camera, orthomosaic (when the background mapper finishes), mission phase (`/mission`), declared targets, GPS map, and alt/airspeed/attitude/**battery** plots.
+
+### 3. Manual / split-terminal alternative
 
 ```bash
-make sitl SPEED=2
-# or: PX4_SIM_SPEED_FACTOR=2 make sitl
+make sitl                 # CAMERA=1 + suas_site by default
+make sitl SPEED=2         # faster-than-realtime
+make sitl CAMERA=0 WORLD=moving_platform   # plain PX4 world, no mapping camera
+
+make run                  # mapping_sitl by default
+make down                 # stop container / tmux session
 ```
 
-This builds the `suas-px4-sitl:v1.17.0` image (if not already built) and launches PX4 with the fixed-wing RC Cessna model (`gz_rc_cessna`) in headless mode.
+`sitl.sh` remains a thin wrapper around `make sitl` (`--no-camera`, `--speed`, etc.).
 
-### 4. Run the Python Flight Script
+### 4. Mapping & evaluation (what runs when)
 
-In a _new_ terminal window from the repository root:
+You do **not** run `make map` during the flight.
+
+| When | What happens |
+|------|----------------|
+| During SURVEY | Camera frames are written to `captures/<run_id>/` |
+| Right after SURVEY | Mission **auto-spawns** a fault-isolated mapper subprocess (look for `Spawned fault-isolated mapper subprocess...`). SEARCH/DELIVERY continue without waiting. Output: `captures/<run_id>/MAST_risk_map.png` |
+| During SEARCH | Target detection runs on the **raw frames** (not the mosaic) |
+
+Offline tools (optional, after the fact):
 
 ```bash
-# Setup virtual environment and install dependencies (first time or on dependency change)
-make venv
-
-# Run flight instructions
-make run
+make map    # redo orthomosaic for the newest capture (or: make map <run_id>)
+make eval   # score coverage % + target geolocation vs worlds/suas_site/scene.json
 ```
 
-The script connects to PX4 over UDP `14540` and executes the autonomous mission defined in `scripts/drone_control.py`.
+`make map` / `make eval` are for re-stitching or scoring — they are not part of the flight loop.
 
 ### 5. View the Drone in 3D (Foxglove Studio)
 
-To see the drone in 3D with real-time attitude, altitude/airspeed plots, and GPS satellite tracking:
+1. **Open Foxglove Studio** (or [https://app.foxglove.dev](https://app.foxglove.dev)).
+2. **Layout → Import from file…** → [`foxglove_layout.json`](foxglove_layout.json).
+3. **Open connection** → Foxglove WebSocket → `ws://localhost:8765`.
 
-1. **Open Foxglove Studio**:
-   - **In your browser (zero-install)**: Go to [https://app.foxglove.dev](https://app.foxglove.dev)
-   - **Or native macOS app**: `brew install --cask foxglove`
-2. **Load the SUAS Layout**:
-   - In Foxglove Studio, click **Layout** (top bar) > **Import from file...** and select [`foxglove_layout.json`](foxglove_layout.json).
-3. **Connect to SITL**:
-   - Click **Open connection** > select **Foxglove WebSocket**.
-   - Set the URL to `ws://localhost:8765` and click **Open**.
-
-Whenever you run `make run`, 3D transforms and telemetry will stream automatically. You can also run `make foxglove` anytime to monitor SITL telemetry without flying the autonomous mission.
-
-#### Following the Drone
-
-[`foxglove_layout.json`](foxglove_layout.json) is pre-configured to follow the drone automatically. If the camera loses lock after manually panning or zooming:
-
-- **3D Panel**:
-  - Open panel settings (**gear icon** in the top right of the 3D panel).
-  - Under **Camera**, set **Follow mode** to **Follow** (or _Following_) and **Follow frame** to **`drone`**.
-  - Click the crosshair/re-center icon on the 3D toolbar to re-snap to the vehicle.
-- **Map Panel**:
-  - Click the **crosshair / target icon** in the top bar of the map.
-  - Or in panel settings, set **Follow topic** to **`/gps`**.
+Whenever you run `make run`, 3D transforms and telemetry stream automatically. You can also run `make foxglove` anytime without flying the autonomous mission.
 
 ### 6. Stop the Simulation
 
-To shut down the simulation container:
-
 ```bash
-docker stop suas-px4-sitl
+make down
+# or: docker stop suas-px4-sitl
 ```
 
 ---
@@ -91,15 +81,8 @@ docker stop suas-px4-sitl
 ## Python Development & Testing
 
 - **Edit Flight Instructions**: Modify `flight_instructions()` at the top of [`scripts/drone_control.py`](scripts/drone_control.py).
-
-- **Run Tests**:
-  ```bash
-  make test
-  ```
-- **Custom Python Interpreter**:
-  ```bash
-  make venv PYTHON=python3.11
-  ```
+- **Run Tests**: `make test`
+- **Custom Python Interpreter**: `make venv PYTHON=python3.11`
 
 ---
 
@@ -118,11 +101,4 @@ If QGroundControl does not connect automatically:
 If you see `failed to receive status ... error reading from server: EOF` during layer export:
 
 1. Confirm Docker Desktop is running and has sufficient disk space/memory allocated.
-2. Rebuild directly with detailed output:
-   ```bash
-   docker build --progress=plain -f docker/px4.dockerfile -t suas-px4-sitl:v1.17.0 .
-   ```
-3. Inspect the image configuration:
-   ```bash
-   docker image inspect suas-px4-sitl:v1.17.0 --format 'Workdir={{.Config.WorkingDir}} Command={{json .Config.Cmd}}'
-   ```
+2. Rebuild: `make sitl REBUILD=1`
